@@ -1,0 +1,10 @@
+name = "ReasBookWeb"
+version = "0.1.0"
+defaultTargets = ["reasbookweb"]
+
+[[lean_lib]]
+name = "ReasBookWeb"
+
+[[lean_exe]]
+name = "reasbookweb"
+root = "Main"
