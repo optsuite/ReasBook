@@ -102,10 +102,7 @@ We are a group of scholars and students interested in mathematical formalization
 
 ### Contributors
 
-- Undergraduate students from Peking University: Hongjia Chen, Wanyi He, Yuxuan Wu, Shengyang Xu, Junda Ying, Penghao Yu, ...
-- Participants in the 2023 summer seminar on mathematical formalization and theorem proving (BICMR, Peking University): Zhipeng Cao, Yiyuan Chen, Heying Wang, Zuokai Wen, Mingquan Zhang, Ruichong Zhang, ...
-- Undergraduate and graduate participants in the 2024 summer seminar (BICMR, Peking University): Yifan Bai, Yunxi Duan, Yuqing Gao, Pengfei Hao, Anqing Shen
-- Other collaborators: Anjie Dong, Xinyi Guo, Yuhao Jiang, Gongxun Li, Zebo Liu, Zhenxi Liu, Siyuan Ma, Guangxuan Pan, Siyuan Shao, Weiran Shi, Junren Si, Xuran Sun, Xuan Tang, Yijie Wang, Zhiyan Wang, Zixi Wang, Suwan Wu, Mingyue Xu, Yunfei Zhang, Changyun Zou
+- Yifan Bai, Anjie Dong, Yunxi Duan, Xinyi Guo, Pengfei Hao, Yuhao Jiang, Gongxun Li, Zebo Liu, Zhenxi Liu, Siyuan Ma, Guangxuan Pan, Siyuan Shao, Weiran Shi, Junren Si, Xuran Sun, Xuan Tang, Yijie Wang, Zhiyan Wang, Zixi Wang, Suwan Wu, Mingyue Xu, Yunfei Zhang, Changyun Zou
 
 ## License
 
