@@ -8,12 +8,40 @@ We welcome collaboration from researchers, students, and practitioners.
 
 ### Books
 
-- *Real Analysis*, Terence Tao (2006)
+- *Analysis II*, Terence Tao (2022)
+  - Chapter 1 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap01/section01/))
+  - Chapter 2 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap02/section01/))
+  - Chapter 3 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap03/section01/))
+  - Chapter 4 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap04/section01/))
+  - Chapter 5 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap05/section01/))
+  - Chapter 6 ([Verso page](https://optsuite.github.io/books/analysis2_tao_2022/chapters/chap06/section01/))
 - *Convex Analysis*, R. Tyrrell Rockafellar (1970)
+  - Chapter 1 ([Verso page](https://optsuite.github.io/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/))
+  - Chapter 2 ([Verso page](https://optsuite.github.io/books/convexanalysis_rockafellar_1970/chapters/chap02/section05/))
+  - Chapter 3 ([Verso page](https://optsuite.github.io/books/convexanalysis_rockafellar_1970/chapters/chap03/section11/))
+  - Chapter 4 ([Verso page](https://optsuite.github.io/books/convexanalysis_rockafellar_1970/chapters/chap04/section17/))
+- *Introduction to Real Analysis, Volume I*, Jiri Lebl (2025)
+  - Chapter 0 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/))
+  - Chapter 1 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/))
+  - Chapter 2 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section01/))
+  - Chapter 3 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section01/))
+  - Chapter 4 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap04/section01/))
+  - Chapter 5 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section01/))
+  - Chapter 6 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap06/section01/))
+  - Chapter 7 ([Verso page](https://optsuite.github.io/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section01/))
+- *Integer Programming*, Michele Conforti et al. (2014) (not yet formalized)
 
 ### Papers
 
-- Ongoing additions are organized in `ReasBook/Papers/`
+- *Smooth Minimization of Nonsmooth Functions*, Yurii Nesterov (2004)
+  - Section 1 ([Verso page](https://optsuite.github.io/papers/smoothminimization_nesterov_2004/sections/section01/))
+  - Section 2 ([Verso page](https://optsuite.github.io/papers/smoothminimization_nesterov_2004/sections/section02/))
+  - Section 3 ([Verso page](https://optsuite.github.io/papers/smoothminimization_nesterov_2004/sections/section03/))
+  - Section 4 ([Verso page](https://optsuite.github.io/papers/smoothminimization_nesterov_2004/sections/section04/))
+  - Section 5 ([Verso page](https://optsuite.github.io/papers/smoothminimization_nesterov_2004/sections/section05/))
+- *On Some Local Rings*, Mansour Maassaran (2025)
+  - Section 1 ([Verso page](https://optsuite.github.io/papers/onsomelocalrings_maassaran_2025/sections/section01/))
+  - Section 2 ([Verso page](https://optsuite.github.io/papers/onsomelocalrings_maassaran_2025/sections/section02/))
 
 ## Repository Layout
 
