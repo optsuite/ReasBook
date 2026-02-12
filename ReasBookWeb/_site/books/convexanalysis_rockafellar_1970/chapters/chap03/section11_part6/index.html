@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 6 -- ReasBook </title><link rel="stylesheet" href="/static/style.css">
+    <script>
+      window.__versoSiteRoot="/"</script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {for (const a of document.querySelectorAll("a[href]")) {const href = a.getAttribute("href");if (!href) continue;if (href.startsWith("/") || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("http://") || href.startsWith("https://")) continue;let normalized = href;while (normalized.startsWith("/")) normalized = normalized.slice(1);a.setAttribute("href", "/" + normalized);}});</script>
+    <base href=".././"><style>:root {
+    /** Typography **/
+    /* The font family used for headers, ToC entries, etc */
+    --verso-structure-font-family: "Helvetica Neue", "Segoe UI", "Roboto", Arial, sans-serif;
+    /* The font family used for body text */
+    --verso-text-font-family: "Helvetica Neue", "Segoe UI", "Roboto", Arial, sans-serif;
+    /* The font family used for code */
+    --verso-code-font-family: monospace;
+
+    /** Text colors **/
+    --verso-text-color: black;
+    --verso-code-color: black;
+    --verso-structure-color: black;
+
+    /** Selected items (e.g. search results) */
+    --verso-selected-color: #def;
+
+    /** Message colors **/
+    /*
+    These colors are used to render Lean's feedback. They come in three severities and two
+    variants. The raw color itself is used for the text of a message of the indicated severity,
+    while the presence of such a message is indicated using the indicator color (e.g. via a
+    wavy underline or a bar in the margin).
+    */
+    --verso-info-color: black;
+    --verso-info-indicator-color: #4777ff;
+    --verso-warning-color: black;
+    --verso-warning-indicator-color: #e7a71d; /* 2.11 contrast ratio for white, 9.94 for black */
+    --verso-error-color: #cc0000;
+    --verso-error-indicator-color: #ff0000;
+
+    /** Code Highlighting **/
+    /*
+    These variables control the rendering of Lean code emitted by Verso. Each category that can be
+    highlighted supports the customization of color, weight, style, and family.
+    */
+    /* Constants (e.g. `List` or `id` or `none`) */
+    --verso-code-const-color: var(--verso-code-color);
+    --verso-code-const-weight: normal;
+    --verso-code-const-style: normal;
+    --verso-code-const-font-family: var(--verso-code-font-family);
+
+    /* Keywords/atoms (e.g. `for` or `def` or `induction`) */
+    --verso-code-keyword-color: var(--verso-code-color);
+    --verso-code-keyword-weight: bold;
+    --verso-code-keyword-style: normal;
+    --verso-code-keyword-font-family: var(--verso-code-font-family);
+
+    /* Local bindings (e.g. `x` in `let x := 5`) */
+    --verso-code-var-color: var(--verso-code-color);
+    --verso-code-var-weight: normal;
+    --verso-code-var-style: italic;
+    --verso-code-kw-font-family: var(--verso-code-font-family);
+}
+</style><style>
+
+
+.hl.lean {
+  white-space: pre;
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+}
+
+.hl.lean .keyword {
+  color: var(--verso-code-keyword-color,);
+  font-weight: var(--verso-code-keyword-weight, bold);
+  font-style: var(--verso-code-keyword-style, normal);
+  font-family: var(--verso-code-keyword-font-family,);
+}
+
+.hl.lean .const {
+  color: var(--verso-code-const-color,);
+  font-weight: var(--verso-code-const-weight, normal);
+  font-style: var(--verso-code-const-style, normal);
+  font-family: var(--verso-code-const-font-family,);
+}
+
+.hl.lean .var {
+  color: var(--verso-code-var-color,);
+  font-weight: var(--verso-code-var-weight, normal);
+  font-style: var(--verso-code-var-style, italic);
+  font-family: var(--verso-code-var-font-family,);
+
+  position: relative;
+}
+
+.hl.lean .literal, .hl.lean .unknown {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+.hover-container {
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline;
+}
+
+.hl.lean a {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+
+.hl.lean a:hover {
+  text-decoration: currentcolor underline solid;
+}
+
+.hl.lean .hover-info {
+  white-space: normal;
+}
+
+.hl.lean .token .hover-info {
+  display: none;
+  position: absolute;
+  background-color: #e5e5e5;
+  border: 1px solid black;
+  padding: 0.5rem;
+  z-index: 300;
+}
+
+.hl.lean .hover-info.messages {
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding: 0 0.5rem 0 0;
+  display: block;
+}
+
+.hl.lean .hover-info code {
+  white-space: pre-wrap;
+  background: none;
+  color: black;
+}
+
+.hl.lean .hover-info.messages > code {
+  padding: 0.5rem;
+  display: block;
+  width: fit-content;
+}
+
+.hl.lean .hover-info.messages > code:only-child {
+  margin: 0;
+}
+
+.hl.lean .hover-info.messages > code {
+  margin: 0.1rem;
+}
+
+.hl.lean .hover-info.messages > code:not(:first-child) {
+  margin-top: 0rem;
+}
+
+.hl.lean {
+}
+
+.hl.lean.block {
+  display: block;
+}
+
+.hl.lean.inline {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.hl.lean * {
+}
+
+.hl.lean .token {
+  transition: all 0.25s; /* Slight fade for highlights */
+}
+
+@media (hover: hover) {
+  .hl.lean .token.binding-hl, .hl.lean .literal.string:hover, .hl.lean .token.typed:hover {
+    background-color: #eee;
+    border-radius: 2px;
+    transition: none;
+  }
+}
+
+
+.hl.lean .has-info .token:not(.tactic-state):not(.tactic-state *), .hl.lean .has-info .inter-text:not(.tactic-state):not(.tactic-state *) {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-thickness: from-font;
+  text-decoration-skip-ink: none;
+}
+
+.hl.lean .has-info .hover-info {
+  display: none;
+  position: absolute;
+  transform: translate(0.25rem, 0.3rem);
+  border: 1px solid black;
+  padding: 0.5rem;
+  z-index: 400;
+  text-align: left;
+}
+
+.hl.lean .has-info.error :not(.tactic-state):not(.tactic-state *){
+  text-decoration-color: red;
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.error:hover {
+    background-color: #ffb3b3;
+  }
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid #ffb3b3;
+}
+
+.tippy-box[data-theme~='error'] .hl.lean .hover-info.messages > code.error {
+  background: none;
+  border: none;
+}
+
+.error .verso-message, .error .verso-message .token, .error .verso-message label {
+  color: var(--verso-error-color);
+}
+
+.error .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-error-color) !important;
+}
+
+.hl.lean .has-info.warning :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso-warning-indicator-color);
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.warning:hover {
+    background-color:var(--verso-warning-color);
+  }
+}
+
+.hl.lean .hover-info.messages > code.warning {
+  background-color: var(--verso-warning-color);
+}
+
+.lean-output {
+  border-left: 0.2em solid transparent;
+  padding: 0 0 0 0.5em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.lean-output.error {
+  border-color: var(--verso-error-indicator-color);
+}
+
+.lean-output.information {
+  border-color: var(--verso-info-indicator-color);
+}
+
+.lean-output.warning {
+  border-color: var(--verso-warning-indicator-color);
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid var(--verso-warning-color);
+}
+
+.tippy-box[data-theme~='warning'] .hl.lean .hover-info.messages > code.warning {
+  background: none;
+  border: none;
+}
+
+
+.hl.lean .has-info.information :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso-info-indicator-color, blue);
+}
+
+@media (hover: hover) {
+  .hl.lean .has-info.information:hover {
+    background-color: #4777ff;
+  }
+}
+
+
+.hl.lean .hover-info.messages > code.information {
+  background-color: #e5e5e5;
+  border-left: 0.2rem solid #4777ff;
+}
+
+.tippy-box[data-theme~='info'] .hl.lean .hover-info.messages > code.information {
+  background: none;
+  border: none;
+}
+
+.hl.lean div.docstring {
+  font-family: var(--verso-text-font-family, sans-serif);
+  white-space: normal;
+  max-width: calc(min(40rem, 90vw));
+  width: max-content;
+}
+
+.hl.lean div.docstring > :last-child {
+  margin-bottom: 0;
+}
+
+.hl.lean div.docstring > :first-child {
+  margin-top: 0;
+}
+
+.hl.lean .hover-info .sep {
+  display: block;
+  width: auto;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid #ccc;
+}
+
+.hl.lean code {
+  font-family: var(--verso-code-font-family);
+}
+
+.hl.lean .tactic-state {
+  display: none;
+  position: relative;
+  width: fit-content;
+  border: 1px solid #888888;
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: #ffffff;
+}
+
+.hl.lean.popup .tactic-state {
+  position: static;
+  display: block;
+  width: auto;
+  border: none;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: #ffffff;
+}
+
+
+.hl.lean .tactic {
+  position: relative;
+  display: inline;
+  vertical-align: top;
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.hl.lean .tactic:has(.tactic-toggle:checked) {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+}
+
+.hl.lean .tactic-toggle:checked ~ .tactic-state {
+  display: inline-block;
+  vertical-align: top;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.hl.lean .tactic > label {
+  position: relative;
+  grid-row: 1;
+  display: inline;
+}
+
+@media (hover: hover) {
+  .hl.lean .tactic:has(.tactic-toggle:not(:checked)) > label:hover {
+    background-color: #eeeeee;
+  }
+}
+
+.hl.lean .tactic-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .tactic > label::after {
+  content: "";
+  border: 1px solid #bbbbbb;
+  /* These need to be em, not rem, to scale with the font */
+  border-radius: 1em;
+  height: 0.25em;
+  vertical-align: middle;
+  width: 0.6em;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  display: inline-block;
+  transition: all 0.5s;
+}
+
+/*
+@media (hover: hover) {
+  .hl.lean .tactic > label:hover::after {
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    transition: all 0.5s;
+  }
+}
+*/
+
+.hl.lean .tactic > label:has(+ .tactic-toggle:checked)::after {
+  border: 1px solid #999999;
+  background-color: #999999;
+  transition: all 0.5s;
+}
+
+.hl.lean .tactic-state .goal + .goal {
+  margin-top: 1.5em;
+}
+
+/*
+Some CSS frameworks customize details/summary in ways not compatible with Verso's output.
+*/
+
+.hl.lean details {
+  display: block !important;
+  margin: 0;
+}
+
+.hl.lean details summary {
+  display: list-item !important;
+  margin: 0;
+}
+
+.hl.lean details summary:focus {
+  outline: none;
+  outline-offset: none;
+  color: inherit;
+}
+
+.hl.lean ul > li {
+  margin-bottom: 0;
+}
+
+.hl.lean details summary::marker {
+  display: inline !important;
+}
+
+.hl.lean details > summary:first-of-type {
+  list-style-type: disclosure-closed;
+  list-style-position: inside;
+}
+
+.hl.lean details[open] > summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+.hl.lean details summary::before, .hl.lean details summary::after {
+  content: "" !important;
+  background: none;
+  display: none;
+}
+
+.hl.lean .tactic-state summary {
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: -0.5em;
+}
+
+.hl.lean .tactic-state details {
+  /* These need to be em, not rem, to scale with the font */
+  padding-left: 0.5em;
+}
+
+.hl.lean .case-label {
+  display: block;
+  position: relative;
+}
+
+.hl.lean .case-label input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"])::before {
+  display: inline-block;
+  background-color: black;
+  content: ' ';
+  transition: ease 0.2s;
+  margin-right: 0.7em;
+  clip-path: polygon(100% 0, 0 0, 50% 100%);
+  width: 0.6em;
+  height: 0.6em;
+  vertical-align: middle;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:not(:checked))::before {
+  transform: rotate(-90deg);
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]) {
+
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:checked) {
+
+}
+
+
+.hl.lean .labeled-case > :not(:first-child) {
+  max-height: 0px;
+  display: block;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in;
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: 0.5em;
+  margin-top: 0.1em;
+}
+
+.hl.lean .labeled-case:has(.case-label input[type="checkbox"]:checked) > :not(:first-child) {
+  max-height: 100%;
+}
+
+
+.hl.lean .goal-name::before {
+  font-style: normal;
+  content: "case ";
+}
+
+.hl.lean .goal-name {
+  font-style: italic;
+  font-family: var(--verso-code-font-family);
+  color: inherit;
+}
+
+.hl.lean .hypotheses {
+  display: table;
+}
+
+.hl.lean .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypothesis > * {
+  display: table-cell;
+}
+
+
+.hl.lean .hypotheses .colon {
+  text-align: center;
+  /* This needs to be em, not rem, to scale with the font */
+  min-width: 1em;
+}
+
+.hl.lean .hypotheses .name {
+  text-align: right;
+}
+
+.hl.lean .hypotheses .name,
+.hl.lean .hypotheses .type,
+.hl.lean .conclusion .type {
+  font-family: var(--verso-code-font-family);
+}
+
+.tippy-box {
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+}
+
+.tippy-box[data-theme~='lean'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 1px solid black;
+}
+.tippy-box[data-theme~='lean'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #e5e5e5;
+}
+.tippy-box[data-theme~='lean'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #e5e5e5;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: #e5e5e5;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::after {
+  bottom: -11px;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::after {
+  top: -11px;
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: #e5e5e5;
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::after {
+  right: -11px;
+  border-width: 11px 0 11px 11px;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: #e5e5e5;
+  border-width: 11px 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::after {
+  left: -11px;
+  border-width: 11px 11px 11px 0;
+}
+
+
+
+.tippy-box[data-theme~='warning'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid var(--verso-warning-color);
+}
+
+.tippy-box[data-theme~='error'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid #f7a7af;
+}
+
+.tippy-box[data-theme~='info'] {
+  background-color: #e5e5e5;
+  color: black;
+  border: 3px solid #99b3c2;
+}
+
+.tippy-box[data-theme~='tactic'] {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='top'] > .tippy-arrow::before {
+  border-top-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-bottom-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='left'] > .tippy-arrow::before {
+  border-left-color: white;
+}
+.tippy-box[data-theme~='tactic'][data-placement^='right'] > .tippy-arrow::before {
+  border-right-color: white;
+}
+
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+}
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: var(--verso-text-color);
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+
+</style>
+<script>
+      
+document.addEventListener("DOMContentLoaded", () => {
+    for (const m of document.querySelectorAll(".math.inline")) {
+        katex.render(m.textContent, m, {throwOnError: false, displayMode: false});
+    }
+    for (const m of document.querySelectorAll(".math.display")) {
+        katex.render(m.textContent, m, {throwOnError: false, displayMode: true});
+    }
+});
+</script>
+    
+<script>
+      
+
+window.onload = () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector("input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    function blockedByTippy(elem) {
+      // Don't show a new hover until the old ones are all closed.
+      // Scoped to the nearest "top-level block" to avoid being O(n) in the size of the document.
+      var block = elem;
+      const topLevel = new Set(["section", "body", "html", "nav", "header"]);
+      while (block.parentNode && !topLevel.has(block.parentNode.nodeName.toLowerCase())) {
+        block = block.parentNode;
+      }
+      for (const child of block.querySelectorAll(".token, .has-info")) {
+        if (child._tippy && child._tippy.state.isVisible) { return true };
+      }
+      return false;
+    }
+
+    for (const c of document.querySelectorAll(".hl.lean .token")) {
+        if (c.dataset.binding != "") {
+            c.addEventListener("mouseover", (event) => {
+                if (blockedByTactic(c)) {return;}
+                const context = c.closest(".hl.lean").dataset.leanContext;
+                for (const example of document.querySelectorAll(".hl.lean")) {
+                    if (example.dataset.leanContext == context) {
+                        for (const tok of example.querySelectorAll(".token")) {
+                            if (c.dataset.binding == tok.dataset.binding) {
+                                tok.classList.add("binding-hl");
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        c.addEventListener("mouseout", (event) => {
+            for (const tok of document.querySelectorAll(".hl.lean .token")) {
+                tok.classList.remove("binding-hl");
+            }
+        });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    let docsJson = "-verso-docs.json";
+    fetch(docsJson).then((resp) => resp.json()).then((versoDocData) => {
+
+      function hideParentTooltips(element) {
+        let parent = element.parentElement;
+        while (parent) {
+          const tippyInstance = parent._tippy;
+          if (tippyInstance) {
+            tippyInstance.hide();
+          }
+          parent = parent.parentElement;
+        }
+      }
+
+
+
+      const defaultTippyProps = {
+        /* DEBUG -- remove the space: * /
+        onHide(any) { return false; },
+        trigger: "click",
+        // */
+        /* theme: "lean", */
+        maxWidth: "none",
+        appendTo: () => document.body,
+        interactive: true,
+        delay: [100, null],
+        /* ignoreAttributes: true, */
+        followCursor: 'initial',
+        onShow(inst) {
+          if (inst.reference.className == 'tactic') {
+
+            const toggle = inst.reference.querySelector("input.tactic-toggle");
+            if (toggle && toggle.checked) {
+              return false;
+            }
+            hideParentTooltips(inst.reference);
+            //if (blockedByTippy(inst.reference)) { return false; }
+
+          } else if (inst.reference.querySelector(".hover-info") || "versoHover" in inst.reference.dataset) {
+            if (blockedByTactic(inst.reference)) { return false };
+            if (blockedByTippy(inst.reference)) { return false; }
+          } else { // Nothing to show here!
+            return false;
+          }
+        },
+        content (tgt) {
+          const content = document.createElement("span");
+          if (tgt.className == 'tactic') {
+            const state = tgt.querySelector(".tactic-state").cloneNode(true);
+            state.style.display = "block";
+            content.appendChild(state);
+            content.style.display = "block";
+            content.className = "hl lean popup";
+          } else {
+            content.className = "hl lean";
+            content.style.display = "block";
+            content.style.maxHeight = "300px";
+            content.style.overflowY = "auto";
+            content.style.overflowX = "hidden";
+            const hoverId = tgt.dataset.versoHover;
+            const hoverInfo = tgt.querySelector(".hover-info");
+            if (hoverId) { // Docstrings from the table
+              // TODO stop doing an implicit conversion from string to number here
+              let data = versoDocData[hoverId];
+              if (data) {
+                const info = document.createElement("span");
+                info.className = "hover-info";
+                info.style.display = "block";
+                info.innerHTML = data;
+                content.appendChild(info);
+                /* Render docstrings - TODO server-side */
+                if ('undefined' !== typeof marked) {
+                    for (const d of content.querySelectorAll("code.docstring, pre.docstring")) {
+                        const str = d.innerText;
+                        const html = marked.parse(str);
+                        const rendered = document.createElement("div");
+                        rendered.classList.add("docstring");
+                        rendered.innerHTML = html;
+                        d.parentNode.replaceChild(rendered, d);
+                    }
+                }
+              } else {
+                content.innerHTML = "Failed to load doc ID: " + hoverId;
+              }
+            } else if (hoverInfo) { // The inline info, still used for compiler messages
+              content.appendChild(hoverInfo.cloneNode(true));
+            }
+            const extraLinks = tgt.parentElement.dataset['versoLinks'];
+            if (extraLinks) {
+              try {
+                const extras = JSON.parse(extraLinks);
+                const links = document.createElement('ul');
+                links.className = 'extra-doc-links';
+                extras.forEach((l) => {
+                  const li = document.createElement('li');
+                  li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                  links.appendChild(li);
+                });
+                content.appendChild(links);
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          }
+          return content;
+        }
+      };
+
+
+      document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'lean');
+      });
+      document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'warning message');
+      });
+      document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'info message');
+      });
+      document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'error message');
+      });
+      document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+        element.setAttribute('data-tippy-theme', 'tactic');
+      });
+      let insts = tippy('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort', defaultTippyProps);
+  });
+}
+
+</script>
+    
+<script src="-verso-js/popper.js"></script>
+    <script src="-verso-js/tippy.js"></script>
+    <link rel="stylesheet" href="-verso-css/tippy-border.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script>
+    </head>
+  <body>
+    <header>
+      <div class="inner-wrap">
+        <nav class="top" role="navigation">
+          <ol>
+            <li>
+              <a href="/">Home</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section01/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section01_part1/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 01 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section01_part2/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 01 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section02/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 02</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section03/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 03</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section04/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 04</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section04_part1/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 04 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section04_part2/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 04 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap01/section05/">Analysis II (Tao, 2022) -- Chapter 01 -- Section 05</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap02/section01/">Analysis II (Tao, 2022) -- Chapter 02 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap02/section02/">Analysis II (Tao, 2022) -- Chapter 02 -- Section 02</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap02/section03/">Analysis II (Tao, 2022) -- Chapter 02 -- Section 03</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap02/section04/">Analysis II (Tao, 2022) -- Chapter 02 -- Section 04</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap02/section05/">Analysis II (Tao, 2022) -- Chapter 02 -- Section 05</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section01/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section02/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 02</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section03/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 03</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section04/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 04</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section05/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 05</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section06/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 06</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section07/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 07</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section07_part1/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 07 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section07_part2/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 07 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap03/section08/">Analysis II (Tao, 2022) -- Chapter 03 -- Section 08</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section01/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section02/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 02</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section02_part1/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section02_part2/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section02_part3/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 02 -- Part 3</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section02_part4/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 02 -- Part 4</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section03/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 03</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section04/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 04</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section05/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 05</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section05_part1/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 05 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section05_part2/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 05 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section06/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 06</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section07/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 07</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section07_part1/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 07 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section07_part2/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 07 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap04/section07_part3/">Analysis II (Tao, 2022) -- Chapter 04 -- Section 07 -- Part 3</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section01/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section02/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 02</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section02_part1/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section02_part2/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section03/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 03</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section04/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 04</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section04_part1/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 04 -- Part 1</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section04_part2/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 04 -- Part 2</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap05/section05/">Analysis II (Tao, 2022) -- Chapter 05 -- Section 05</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap06/section01/">Analysis II (Tao, 2022) -- Chapter 06 -- Section 01</a></li>
+            <li>
+              <a href="books/analysis2_tao_2022/chapters/chap06/section02/">Analysis II (Tao, 2022) -- Chapter 06 -- Section 02</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section01/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 01</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 01 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 01 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 01 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 01 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section02/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 02</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section02_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section02_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section03_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 03 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section04_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 04 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap01/section05_part13/">Convex Analysis (Rockafellar, 1970) -- Chapter 01 -- Section 05 -- Part 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section05/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 05</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section06_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 06 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section07_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 07 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section08_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 08 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part13/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part14/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 14</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part15/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 15</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section09_part16/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 09 -- Part 16</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap02/section10_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 02 -- Section 10 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section11_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section12_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 12 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section13_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 13 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section14_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 14 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part13/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part14/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 14</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part15/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 15</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part16/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 16</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part17/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 17</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part18/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 18</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part19/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 19</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part20/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 20</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part21/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 21</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part22/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 22</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section15_part23/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 15 -- Part 23</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part13/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part14/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 14</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap03/section16_part15/">Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 16 -- Part 15</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section17_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 17 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section18_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 18 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 2</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part3/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 3</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part4/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 4</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part5/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 5</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part6/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 6</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part7/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 7</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part8/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 8</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part9/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 9</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part10/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 10</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part11/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 11</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part12/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 12</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part13/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 13</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section19_part14/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 19 -- Part 14</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section20/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 20</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part1/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 20 -- Part 1</a></li>
+            <li>
+              <a href="books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part2/">Convex Analysis (Rockafellar, 1970) -- Chapter 04 -- Section 20 -- Part 2</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part1/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03 -- Part 1</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part2/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03 -- Part 2</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part3/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03 -- Part 3</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part4/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03 -- Part 4</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part5/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 00 -- Section 03 -- Part 5</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 01 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 01 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 01 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 01 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section05/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 01 -- Section 05</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section05/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 05</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap02/section06/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 02 -- Section 06</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section05/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 05</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap03/section06/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 03 -- Section 06</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap04/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 04 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap04/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 04 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap04/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 04 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap04/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 04 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part1/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part2/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part3/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 3</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part4/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 4</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part5/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 5</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section02_part6/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 02 -- Part 6</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap05/section05/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 05 -- Section 05</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap06/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 06 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap06/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 06 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap06/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 06 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section01/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 01</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section02/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 02</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section03/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 03</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section04/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 04</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section05/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 05</a></li>
+            <li>
+              <a href="books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section06/">Introduction to Real Analysis, Volume I (Jiri Lebl, 2025) -- Chapter 07 -- Section 06</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/paper/">On Some Local Rings (Maassaran, 2025) -- Overview</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section01/">On Some Local Rings (Maassaran, 2025) -- Section 01</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section01_part1/">On Some Local Rings (Maassaran, 2025) -- Section 01 -- Part 1</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section01_part2/">On Some Local Rings (Maassaran, 2025) -- Section 01 -- Part 2</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section02/">On Some Local Rings (Maassaran, 2025) -- Section 02</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section02_part1/">On Some Local Rings (Maassaran, 2025) -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section02_part2/">On Some Local Rings (Maassaran, 2025) -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section02_part3/">On Some Local Rings (Maassaran, 2025) -- Section 02 -- Part 3</a></li>
+            <li>
+              <a href="papers/onsomelocalrings_maassaran_2025/sections/section02_part4/">On Some Local Rings (Maassaran, 2025) -- Section 02 -- Part 4</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/paper/">Smooth Minimization (Nesterov, 2004) -- Overview</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section01/">Smooth Minimization (Nesterov, 2004) -- Section 01</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section02/">Smooth Minimization (Nesterov, 2004) -- Section 02</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section02_part1/">Smooth Minimization (Nesterov, 2004) -- Section 02 -- Part 1</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section02_part2/">Smooth Minimization (Nesterov, 2004) -- Section 02 -- Part 2</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section02_part3/">Smooth Minimization (Nesterov, 2004) -- Section 02 -- Part 3</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section03/">Smooth Minimization (Nesterov, 2004) -- Section 03</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section03_part1/">Smooth Minimization (Nesterov, 2004) -- Section 03 -- Part 1</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section03_part2/">Smooth Minimization (Nesterov, 2004) -- Section 03 -- Part 2</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04/">Smooth Minimization (Nesterov, 2004) -- Section 04</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part1/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 1</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part2/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 2</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part3/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 3</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part4/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 4</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part5/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 5</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part6/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 6</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part7/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 7</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part8/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 8</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part9/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 9</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section04_part10/">Smooth Minimization (Nesterov, 2004) -- Section 04 -- Part 10</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05/">Smooth Minimization (Nesterov, 2004) -- Section 05</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05_part1/">Smooth Minimization (Nesterov, 2004) -- Section 05 -- Part 1</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05_part2/">Smooth Minimization (Nesterov, 2004) -- Section 05 -- Part 2</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05_part3/">Smooth Minimization (Nesterov, 2004) -- Section 05 -- Part 3</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05_part4/">Smooth Minimization (Nesterov, 2004) -- Section 05 -- Part 4</a></li>
+            <li>
+              <a href="papers/smoothminimization_nesterov_2004/sections/section05_part5/">Smooth Minimization (Nesterov, 2004) -- Section 05 -- Part 5</a></li>
+            </ol>
+          </nav>
+        </div>
+      </header>
+    <div class="main" role="main">
+      <div class="wrap">
+        <h1>
+          Convex Analysis (Rockafellar, 1970) -- Chapter 03 -- Section 11 -- Part 6</h1>
+        <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.open-93" data-verso-hover="68">open</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.openScoped-98">scoped</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Pointwise</span></code><code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.section-116" data-verso-hover="0">section</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Chap03</span></code><code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.section-131" data-verso-hover="0">section</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Section11</span></code><div class="declaration">
+          <code class="hl lean block" data-lean-context="name"></code><p>
+            Theorem 11.5: A closed convex set <code class="hl lean inline" data-lean-context="name"><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">C</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">C</span></span></code> is the intersection of the closed half-spaces which
+contain it.</p>
+          <p>
+            In mathlib, a convenient way to express the closed half-spaces containing <code class="hl lean inline" data-lean-context="name"><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">C</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">C</span></span></code> is to quantify over
+continuous linear functionals <code class="hl lean inline" data-lean-context="name"></code> and consider the half-space
+<code class="hl lean inline" data-lean-context="name"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">{</span><span class="var token" data-binding="var-_pp_uniq.2" data-verso-hover="109">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∃</span><span class="inter-text"> </span><span class="var token" data-binding="var-_pp_uniq.3" data-verso-hover="456">y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∈</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="inter-text"> </span><span class="unknown token" data-binding="">≤</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="unknown token" data-binding="">}</span></span><span class="text"> : </span><span class="highlighted"><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">?m.1</span></span></code></span></span><span class="unknown token" data-binding="">{</span></span><span class="var token" data-binding="var-_uniq.21305" data-verso-hover="109">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∃</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.21310" data-verso-hover="456">y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∈</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">C</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">C</span></span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">l</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">l</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">≤</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">l</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">l</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">}</span></code>.</p>
+          <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.theorem-487">theorem</span><span class="inter-text"> </span><span class="unknown token" data-binding="">isClosed_convex_eq_iInter_halfSpaces</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Nat</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">C</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">hCconv</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Convex</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">hCclosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">IsClosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">⋂</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">StrongDual</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">{</span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="inter-text"> </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∃</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∈</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">≤</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">}</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-726" data-verso-hover="2">by</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.classical-731" data-verso-hover="16">classical</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Elab.Tactic.Ext.ext-743" data-verso-hover="54">ext</span><span class="inter-text"> </span><span class="unknown token" data-binding="">a</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.constructor-751" data-verso-hover="9">constructor</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">·</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.intro-768" data-verso-hover="6">intro</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haInter</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Batteries.Tactic.byContra-786" data-verso-hover="42">by_contra</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haC</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.tacticHave__-804" data-verso-hover="8">have</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hCne</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C.Nonempty</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-830" data-verso-hover="2">by</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.rcases-839" data-verso-hover="24">rcases</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Set.mem_iInter</span><span class="unknown token" data-binding="">.</span><span class="unknown token" data-binding="">1</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haInter</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">0</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">StrongDual</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-null-911">with</span><span class="inter-text"> </span><span class="unknown token" data-binding="">⟨</span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hyC</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">_</span><span class="unknown token" data-binding="">⟩</span><span class="inter-text">
+      </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.exact-938" data-verso-hover="10">exact</span><span class="inter-text"> </span><span class="unknown token" data-binding="">⟨</span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hyC</span><span class="unknown token" data-binding="">⟩</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.rcases-961" data-verso-hover="24">rcases</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">exists_strongDual_strict_sep_point_of_not_mem_isClosed_convex</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">a</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">a</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">C</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">C</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">hCconv</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hCclosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hCne</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haC</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-null-1100">with</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">⟨</span><span class="unknown token" data-binding="">l</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hl</span><span class="unknown token" data-binding="">⟩</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.rcases-1127" data-verso-hover="24">rcases</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Set.mem_iInter</span><span class="unknown token" data-binding="">.</span><span class="unknown token" data-binding="">1</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haInter</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-null-1163">with</span><span class="inter-text"> </span><span class="unknown token" data-binding="">⟨</span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hyC</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hle</span><span class="unknown token" data-binding="">⟩</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.exact-1190" data-verso-hover="10">exact</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">not_lt_of_ge</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hle</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">hl</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">hyC</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+  </span><span class="unknown token" data-binding="">·</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.intro-1231" data-verso-hover="6">intro</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haC</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.refine-1245" data-verso-hover="5">refine</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Set.mem_iInter</span><span class="unknown token" data-binding="">.</span><span class="unknown token" data-binding="">2</span><span class="inter-text"> </span><span class="unknown token" data-binding="">?</span><span class="unknown token" data-binding="">_</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.intro-1276" data-verso-hover="6">intro</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.exact-1288" data-verso-hover="10">exact</span><span class="inter-text"> </span><span class="unknown token" data-binding="">⟨</span><span class="unknown token" data-binding="">a</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">haC</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">le_rfl</span><span class="unknown token" data-binding="">⟩</span></code></div>
+        <div class="declaration">
+          <code class="hl lean block" data-lean-context="name"></code><p>
+            <code class="hl lean inline" data-lean-context="name"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">(convexHull</span><span class="inter-text"> </span><span class="const token" data-binding="const-Real" data-verso-hover="18">ℝ</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="unknown token" data-binding="">)</span></span><span class="text"> : </span><span class="highlighted"><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">?m.3</span></span></code></span></span><span class="const token" data-binding="const-closure" data-verso-hover="57">closure</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-convexHull" data-verso-hover="295">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">S</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">S</span></span><span class="unknown token" data-binding="">)</span></code> is a closed set.</p>
+          <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-group-1369">lemma</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure_convexHull_isClosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Nat</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">S</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">IsClosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-1487" data-verso-hover="2">by</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.exact-1492" data-verso-hover="10">exact</span><span class="inter-text"> </span><span class="unknown token" data-binding="">isClosed_closure</span></code></div>
+        <div class="declaration">
+          <code class="hl lean block" data-lean-context="name"></code><p>
+            <code class="hl lean inline" data-lean-context="name"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">(convexHull</span><span class="inter-text"> </span><span class="const token" data-binding="const-Real" data-verso-hover="18">ℝ</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="unknown token" data-binding="">)</span></span><span class="text"> : </span><span class="highlighted"><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">?m.3</span></span></code></span></span><span class="const token" data-binding="const-closure" data-verso-hover="57">closure</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-convexHull" data-verso-hover="295">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">S</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">S</span></span><span class="unknown token" data-binding="">)</span></code> is a convex set.</p>
+          <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-group-1569">lemma</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure_convexHull_convex</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Nat</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">S</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">Convex</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-1688" data-verso-hover="2">by</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.exact-1693" data-verso-hover="10">exact</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convex_convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">.</span><span class="unknown token" data-binding="">closure</span></code></div>
+        <div class="declaration">
+          <code class="hl lean block" data-lean-context="name"></code><p>
+            Corollary 11.5.1. Let <code class="hl lean inline" data-lean-context="name"><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">S</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">S</span></span></code> be any subset of <code class="hl lean inline" data-lean-context="name"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="highlighted"><span class="inter-text"></span><span class="const token" data-binding="const-Real" data-verso-hover="18">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">^</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span></span><span class="text"> : </span><span class="highlighted"><span class="inter-text"></span><span class="sort token" data-binding="sort-7243200735919010059" data-verso-hover="19">Type</span><span class="inter-text"></span></span></code></span></span><span class="unknown token" data-binding="">ℝ</span></span><span class="unknown token" data-binding="">^</span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">n</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">n</span></span></code>. Then <code class="hl lean inline" data-lean-context="name"><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">cl</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">cl</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">conv</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span></code> (i.e.
+<code class="hl lean inline" data-lean-context="name"><span class="has-info information"><span class="hover-container"><span class="hover-info messages"><code class="verso-message information"><span class="text"></span><span class="highlighted"><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">(convexHull</span><span class="inter-text"> </span><span class="const token" data-binding="const-Real" data-verso-hover="18">ℝ</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">sorry</span><span class="unknown token" data-binding="">)</span></span><span class="text"> : </span><span class="highlighted"><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">?m.3</span></span></code></span></span><span class="const token" data-binding="const-closure" data-verso-hover="57">closure</span></span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="const token" data-binding="const-convexHull" data-verso-hover="295">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">S</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">S</span></span><span class="unknown token" data-binding="">)</span></code>) is the intersection of all the closed half-spaces containing <code class="hl lean inline" data-lean-context="name"><span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="verso-message error"><span class="text"></span><span class="text">Unknown identifier `</span><span class="text">S</span><span class="text">`</span><span class="text"></span></code></span></span><span class="unknown token" data-binding="">S</span></span></code>.</p>
+          <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.theorem-1914">theorem</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure_convexHull_eq_iInter_halfSpaces</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Nat</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">S</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Set</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">=</span><span class="inter-text">
+      </span><span class="unknown token" data-binding="">⋂</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">StrongDual</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">,</span><span class="inter-text">
+        </span><span class="unknown token" data-binding="">{</span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Fin</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">→</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Real</span><span class="inter-text"> </span><span class="unknown token" data-binding="">|</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∃</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="inter-text"> </span><span class="unknown token" data-binding="">∈</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">,</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">x</span><span class="inter-text"> </span><span class="unknown token" data-binding="">≤</span><span class="inter-text"> </span><span class="unknown token" data-binding="">l</span><span class="inter-text"> </span><span class="unknown token" data-binding="">y</span><span class="unknown token" data-binding="">}</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.byTactic-2165" data-verso-hover="2">by</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Tactic.simpa-2170" data-verso-hover="7">simpa</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-null-2176">using</span><span class="inter-text">
+    </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">isClosed_convex_eq_iInter_halfSpaces</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">C</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">convexHull</span><span class="inter-text"> </span><span class="unknown token" data-binding="">ℝ</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">hCconv</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure_convexHull_convex</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">S</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="inter-text">
+          </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">hCclosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">closure_convexHull_isClosed</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">n</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">n</span><span class="unknown token" data-binding="">)</span><span class="inter-text"> </span><span class="unknown token" data-binding="">(</span><span class="unknown token" data-binding="">S</span><span class="inter-text"> </span><span class="unknown token" data-binding="">:=</span><span class="inter-text"> </span><span class="unknown token" data-binding="">S</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">)</span><span class="unknown token" data-binding="">.</span><span class="unknown token" data-binding="">symm</span></code></div>
+        <code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.end-2410" data-verso-hover="47">end</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Section11</span></code><code class="hl lean block" data-lean-context="name"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.end-2424" data-verso-hover="47">end</span><span class="inter-text"> </span><span class="unknown token" data-binding="">Chap03</span></code><code class="hl lean block" data-lean-context="name"><span class="unknown token" data-binding=""></span></code></div>
+      </div>
+    </body>
+  </html>
+

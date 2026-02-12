@@ -453,9 +453,7 @@ lemma section13_deltaStar_singleton {n : Nat} (a xStar : Fin n → ℝ) :
 lemma section13_posDef_dotProduct_mulVec_nonneg {n : Nat} {Q : Matrix (Fin n) (Fin n) ℝ}
     (hQ : Q.PosDef) (x : Fin n → ℝ) :
     0 ≤ dotProduct x (Q.mulVec x) := by
-  by_cases hx : x = 0
-  · simp [hx]
-  · exact le_of_lt (by simpa [Matrix.mulVec] using hQ.2 x hx)
+  simpa using (Matrix.PosSemidef.dotProduct_mulVec_nonneg hQ.posSemidef x)
 
 open scoped MatrixOrder
 

@@ -59,7 +59,15 @@ abbrev infiniteElementCollection (A : Set α) : Prop :=
 /-- The book's infinite sets correspond to mathlib's `Set.Infinite`. -/
 theorem infiniteElementCollection_iff_setInfinite {A : Set α} :
     infiniteElementCollection (A := A) ↔ Set.Infinite A := by
-  simp [infiniteElementCollection, Set.Infinite, finiteElementCollection_iff_setFinite]
+  constructor
+  · intro hInfColl
+    change ¬ Set.Finite A
+    intro hFinite
+    exact hInfColl ((finiteElementCollection_iff_setFinite).2 hFinite)
+  · intro hInfinite
+    change ¬ Set.Finite A at hInfinite
+    intro hFinColl
+    exact hInfinite ((finiteElementCollection_iff_setFinite).1 hFinColl)
 
 /-- Definition 0.3.28: We write `|A| ≤ |B|` if there is an injection from `A` to `B`;
 `|A| = |B|` when the two have the same cardinality; `|A| < |B|` when `|A| ≤ |B|` but the
@@ -157,7 +165,8 @@ theorem countableElementCollection_iff_setCountable {A : Set α} :
     · right
       have hcount : Countable (Subtype A) := (Set.countable_coe_iff).2 h
       have hInfSet : Set.Infinite A := by
-        simpa [Set.Infinite] using hfinite
+        change ¬ Set.Finite A
+        exact hfinite
       have hInf : Infinite (Subtype A) := (Set.infinite_coe_iff).2 hInfSet
       classical
       let _ : Countable (Subtype A) := hcount

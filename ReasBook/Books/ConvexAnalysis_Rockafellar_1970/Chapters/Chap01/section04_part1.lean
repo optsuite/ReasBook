@@ -752,19 +752,15 @@ lemma posSemidef_iff_real {n : Nat} (M : Matrix (Fin n) (Fin n) ℝ) :
     Matrix.PosSemidef M ↔ M.IsHermitian ∧ ∀ x, 0 ≤ x ⬝ᵥ (M *ᵥ x) := by
   constructor
   · intro h
-    refine ⟨h.1, ?_⟩
+    rcases (Matrix.posSemidef_iff_dotProduct_mulVec (M := M)).1 h with ⟨hHerm, hQuad⟩
+    refine ⟨hHerm, ?_⟩
     intro x
-    have hstar : (star x : Fin n → ℝ) = x := by
-      ext i
-      simp
-    simpa [hstar] using h.2 x
+    simpa using hQuad x
   · intro h
+    refine (Matrix.posSemidef_iff_dotProduct_mulVec (M := M)).2 ?_
     refine ⟨h.1, ?_⟩
     intro x
-    have hstar : (star x : Fin n → ℝ) = x := by
-      ext i
-      simp
-    simpa [hstar] using h.2 x
+    simpa using h.2 x
 
 /-- Derivative along a line equals the Fréchet derivative applied to the direction. -/
 lemma line_deriv_eq_fderiv {n : Nat} {f : (Fin n → ℝ) → ℝ} {y z : Fin n → ℝ} {t : ℝ}
