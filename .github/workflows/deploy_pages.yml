@@ -67,7 +67,6 @@ jobs:
 
       - name: Build Verso site
         run: |
-          ~/.elan/bin/lake build
           ~/.elan/bin/lake exe reasbook-site
         working-directory: ReasBookWeb
 
