@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
-SITE_BASE = "https://optsuite.github.io/ReasBook/"
+SITE_BASE = "/ReasBook/"
 DOCS_BASE = f"{SITE_BASE}docs/"
 GITHUB_SOURCE_BASE = "https://github.com/optsuite/ReasBook/blob/main/ReasBook/"
 
@@ -328,7 +328,7 @@ def emit_route_table(entries: list[Entry]) -> str:
 
 
 def doc_link(module: str) -> str:
-    return f"{DOCS_BASE}find/?pattern={module}#doc"
+    return f"{DOCS_BASE}find?pattern={module}#doc"
 
 
 def source_link(module: str) -> str:

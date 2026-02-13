@@ -8,22 +8,22 @@ We welcome collaboration from researchers, students, and practitioners.
 
 - Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Books.Analysis2_Tao_2022#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022)
+  - Links: [Verso](/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](/ReasBook/docs/find?pattern=Books.Analysis2_Tao_2022#doc) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean)
 - R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Books.ConvexAnalysis_Rockafellar_1970#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970)
+  - Links: [Verso](/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](/ReasBook/docs/find?pattern=Books.ConvexAnalysis_Rockafellar_1970#doc) | [Lean source](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean)
 - Jiri Lebl, *Introduction to Real Analysis, Volume I*, version 6.2, May 23, 2025, (TBD: publisher/city), (TBD: ISBN).
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025)
+  - Links: [Verso](/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [Documentation](/ReasBook/docs/find?pattern=Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025#doc) | [Lean source](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
 - Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/integerprogramming_conforti_2014/) (TBD: landing page not yet generated) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Books.IntegerProgramming_Conforti_2014#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014)
+  - Links: Verso (TBD: landing page not yet generated) | [Documentation](/ReasBook/docs/) | [Source index](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
 - Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Papers.SmoothMinimization_Nesterov_2004#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004)
+  - Links: [Verso](/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [Documentation](/ReasBook/docs/find?pattern=Papers.SmoothMinimization_Nesterov_2004#doc) | [Lean source](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
 - Mohamad Maassarani, "On Some Local Rings," arXiv:2512.19197v1 [math.AC], 2025.
   - Contributors: (TBD)
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/onsomelocalrings_maassaran_2025/paper/) | [API docs](https://optsuite.github.io/ReasBook/docs/find/?pattern=Papers.OnSomeLocalRings_Maassaran_2025#doc) | [GitHub source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/OnSomeLocalRings_Maassaran_2025)
+  - Links: [Verso](/ReasBook/papers/onsomelocalrings_maassaran_2025/paper/) | [Documentation](/ReasBook/docs/find?pattern=Papers.OnSomeLocalRings_Maassaran_2025#doc) | [Lean source](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Paper.lean)
 
 ## Repository Layout
 
@@ -74,7 +74,7 @@ From the repository root:
 ./build.sh
 ```
 
-Build the Verso site (including API docs copied to `_site/docs`):
+Build the Verso site (including Documentation copied to `_site/docs`):
 
 ```bash
 ./build-web.sh

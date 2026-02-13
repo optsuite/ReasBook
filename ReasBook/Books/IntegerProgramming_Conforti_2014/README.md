@@ -1,7 +1,7 @@
 Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
 
 ## Chapter 1 Getting Started
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 1.1 Integer Programming
 - 1.2 Methods for Solving Integer Programs
 - 1.2.1 The Branch- and- Bound Method
@@ -21,7 +21,7 @@ Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
 - 1.7 Exercises
 
 ## Chapter 2 Integer Programming Models
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 2.1 The Knapsack Problem
 - 2.2 Comparing Formulations
 - 2.3 Cutting Stock: Formulations with Many Variables
@@ -46,7 +46,7 @@ Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
 - 2.14 Exercises
 
 ## Chapter 3 Linear Inequalities and Polyhedra
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 3.1 Fourier Elimination
 - 3.2 Farkas' Lemma
 - 3.3 Linear Programming
@@ -73,7 +73,7 @@ Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
 - 3.18 Exercises
 
 ## Chapter 4 Perfect Formulations
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 4.1 Properties of Integral Polyhedra
 - 4.2 Total Unimodularity
 - 4.3 Networks
@@ -104,7 +104,7 @@ Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
 - 4.12 Exercises
 
 ## Chapter 5 Split and Gomory Inequalities
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 5.1 Split Inequalities
 - 5.1.1 Inequality Description of the Split Closure
 - 5.1.2 Polyhedrality of the Split Closure
@@ -125,7 +125,7 @@ Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
 - 5.6 Exercises
 
 ## Chapter 6 Intersection Cuts and Corner Polyhedra
-Links: Verso (TBD) | API docs (TBD) | Lean source (TBD)
+Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD)
 - 6.1 Corner Polyhedron
 - 6.2 Intersection Cuts
 - 6.2.1 The Gauge Function
