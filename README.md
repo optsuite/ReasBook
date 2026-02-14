@@ -6,6 +6,7 @@ We welcome collaboration from researchers, students, and practitioners.
 
 ## Current Coverage
 
+### Books
 - Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.
   - Contributors: (TBD)
   - Links: [Verso](/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](/ReasBook/docs/find?pattern=Books.Analysis2_Tao_2022#doc) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean)
@@ -18,6 +19,8 @@ We welcome collaboration from researchers, students, and practitioners.
 - Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
   - Contributors: (TBD)
   - Links: Verso (TBD: landing page not yet generated) | [Documentation](/ReasBook/docs/) | [Source index](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
+
+### Papers
 - Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.
   - Contributors: (TBD)
   - Links: [Verso](/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [Documentation](/ReasBook/docs/find?pattern=Papers.SmoothMinimization_Nesterov_2004#doc) | [Lean source](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
