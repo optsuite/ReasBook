@@ -11,24 +11,24 @@ ReasBook is generated with the tool: [M2F](https://github.com/optsuite/M2F.git).
 ### Books
 - [Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022)
   - Contributors: Chenyi Li, Min Cui, Qiming Dai, Shu Miao, Wanli Ma, Yi Yuan, Zichen Wang, Ziyu Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean)
-- R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.
+  - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean) | [README](./ReasBook/Books/Analysis2_Tao_2022/README.md)
+- [R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970)
   - Contributors: Changyu Zou, Chenyi Li, Guangxuan Pan, Pengfei Hao, Qiming Dai, Shu Miao, Siyuan Shao, Suwan Wu, Wanli Ma, Weiran Shi, Xinyi Guo, Xuran Sun, Yifan Bai, Yijie Wang, Yunfei Zhang, Yunxi Duan, Yuhao Jiang, Zebo Liu, Zhiyan Wang, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01_part1.html) | [Lean source](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean)
-- Jiri Lebl, *Introduction to Real Analysis, Volume I*, version 6.2, May 23, 2025, (TBD: publisher/city), (TBD: ISBN).
+  - Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01_part1.html) | [Lean source](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean) | [README](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/README.md)
+- [Jiri Lebl, *Introduction to Real Analysis, Volume I*, version 6.2, May 23, 2025, (TBD: publisher/city), (TBD: ISBN).](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025)
   - Contributors: Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
-- Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
+  - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean) | [README](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/README.md)
+- [Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014)
   - Contributors: Binghe Huang, Chenglin Li, Chenrui Yang, Chenxi Liu, Congyuan Lei, Dongye Song, Fuzhi Wang, Haodong Zhang, Jiangnan Song, Jinmin Song, Junze Qiao, Junzhe Lai, Kaiwen He, Liming Han, Lurong Yang, Meng Zhou, Pengqi Lei, Renran Luo, Siyan Chen, Wangqi Liu, Wenxin Zeng, Wanli Ma, Wenxuan Wu, Xinru Zhu, Xu Han, Xutianshi Tao, Yichao Guo, Youyou Qin, Yuhan Zhang, Yushen Guo, Yutong Zhang, Ze Zhai, Zheng Ma, Zhiyong Chen, Zichen Wang, Zichen Xu, Zihao Liu.
-  - Links: Verso (TBD: landing page not yet generated) | [Documentation](https://optsuite.github.io/ReasBook/docs/) | [Source index](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
+  - Links: Verso (TBD: landing page not yet generated) | [Documentation](https://optsuite.github.io/ReasBook/docs/) | [README](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
 
 ### Papers
-- Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.
+- [Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004)
   - Contributors: Wanli Ma, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html) | [Lean source](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
-- Mohamad Maassarani, "On Some Local Rings," arXiv:2512.19197v1 [math.AC], 2025.
+  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html) | [Lean source](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean) | [README](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/README.md)
+- [Mohamad Maassarani, "On Some Local Rings," arXiv:2512.19197v1 [math.AC], 2025.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/OnSomeLocalRings_Maassaran_2025)
   - Contributors: Liang Xiao, Haochen Ju, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/onsomelocalrings_maassaran_2025/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html) | [Lean source](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Paper.lean)
+  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/onsomelocalrings_maassaran_2025/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html) | [Lean source](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Paper.lean) | [README](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/README.md)
 
 ## Repository Layout
 
