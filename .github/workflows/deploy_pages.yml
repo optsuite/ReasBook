@@ -41,6 +41,10 @@ jobs:
           restore-keys: |
             lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-
 
+      - name: Force clean site output only
+        run: |
+          rm -rf ReasBookWeb/_site
+
       # mathlib cache
       - name: Get Mathlib cache (main project)
         run: |
@@ -79,12 +83,17 @@ jobs:
 
       - name: Verify generated site tree
         run: |
+          echo "Commit: $GITHUB_SHA"
           echo "Top-level _site entries:"
           ls -la ReasBookWeb/_site
           echo "Top-level _site/docs entries:"
           ls -la ReasBookWeb/_site/docs
           echo "Check site root injection in generated HTML:"
           grep -R --line-number "__versoSiteRoot" ReasBookWeb/_site | head -n 20
+          echo "Check <base href> in generated HTML:"
+          grep -R --line-number '<base href="/ReasBook/"/>' ReasBookWeb/_site | head -n 20
+          echo "Check for known bad duplicated path pattern:"
+          ! grep -R --line-number 'chap01/books/' ReasBookWeb/_site
           test -f ReasBookWeb/_site/index.html
           test -f ReasBookWeb/_site/docs/index.html
 
