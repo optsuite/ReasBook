@@ -19,15 +19,15 @@ We welcome collaboration from researchers, students, and practitioners.
   - Contributors: Zichen Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
 - Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
-  - Contributors: (TBD)
+  - Contributors: Binghe Huang, Chenglin Li, Chenrui Yang, Chenxi Liu, Congyuan Lei, Dongye Song, Fuzhi Wang, Haodong Zhang, Jiangnan Song, Jinmin Song, Junze Qiao, Junzhe Lai, Kaiwen He, Liming Han, Lurong Yang, Meng Zhou, Pengqi Lei, Renran Luo, Siyan Chen, Wangqi Liu, Wenxin Zeng, Wanli Ma, Wenxuan Wu, Xinru Zhu, Xu Han, Xutianshi Tao, Yichao Guo, Youyou Qin, Yuhan Zhang, Yushen Guo, Yutong Zhang, Ze Zhai, Zheng Ma, Zhiyong Chen, Zichen Wang, Zichen Xu, Zihao Liu.
   - Links: Verso (TBD: landing page not yet generated) | [Documentation](https://optsuite.github.io/ReasBook/docs/) | [Source index](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
 
 ### Papers
 - Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.
-  - Contributors: (TBD)
+  - Contributors: Wanli Ma, Zichen Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html) | [Lean source](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
 - Mohamad Maassarani, "On Some Local Rings," arXiv:2512.19197v1 [math.AC], 2025.
-  - Contributors: (TBD)
+  - Contributors: Liang Xiao, Haochen Ju, Zichen Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/papers/onsomelocalrings_maassaran_2025/paper/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html) | [Lean source](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Paper.lean)
 
 ## Repository Layout
