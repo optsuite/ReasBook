@@ -1,15 +1,15 @@
 # ReasBook
 
-Generated with [M2F](https://github.com/optsuite/M2F.git). This ReasBook is produced using that tool.
-
 **ReasBook** is a Lean 4 project for formalizing mathematics from textbooks and research papers.
 The goal is to preserve the structure of original references while producing machine-checkable proofs.
 We welcome collaboration from researchers, students, and practitioners.
 
+ReasBook is generated with the tool: [M2F](https://github.com/optsuite/M2F.git).
+
 ## Current Coverage
 
 ### Books
-- Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.
+- [Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022)
   - Contributors: Chenyi Li, Min Cui, Qiming Dai, Shu Miao, Wanli Ma, Yi Yuan, Zichen Wang, Ziyu Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean)
 - R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.
