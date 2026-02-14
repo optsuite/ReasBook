@@ -23,22 +23,21 @@ jobs:
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      # 缓存 .lake，显著提速
-      - name: Cache main project .lake
-        uses: actions/cache@v4
+      - name: Restore main project cache if available
+        uses: actions/cache/restore@v4
         with:
           path: |
             ReasBook/.lake
-          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-main-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Cache ReasBookWeb project .lake
-        uses: actions/cache@v4
+      - name: Restore ReasBookWeb project cache if available
+        uses: actions/cache/restore@v4
         with:
           path: |
             ReasBookWeb/.lake
-          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}
+          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-
 
@@ -78,6 +77,31 @@ jobs:
           find ReasBookWeb/_site/docs -name "*.trace" -delete || true
           find ReasBookWeb/_site/docs -name "*.hash" -delete || true
 
+      - name: Verify generated site tree
+        run: |
+          echo "Top-level _site entries:"
+          ls -la ReasBookWeb/_site
+          echo "Top-level _site/docs entries:"
+          ls -la ReasBookWeb/_site/docs
+          echo "Check site root injection in generated HTML:"
+          grep -R --line-number "__versoSiteRoot" ReasBookWeb/_site | head -n 20
+          test -f ReasBookWeb/_site/index.html
+          test -f ReasBookWeb/_site/docs/index.html
+
+      - name: Save main project cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ReasBook/.lake
+          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
+
+      - name: Save ReasBookWeb project cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ReasBookWeb/.lake
+          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -86,6 +110,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
+      - name: Print deployed Pages URL
+        run: echo "GitHub Pages URL: ${{ steps.deployment.outputs.page_url }}"
