@@ -1,5 +1,7 @@
 # ReasBook
 
+Generated with [M2F](https://github.com/optsuite/M2F.git). This ReasBook is produced using that tool.
+
 **ReasBook** is a Lean 4 project for formalizing mathematics from textbooks and research papers.
 The goal is to preserve the structure of original references while producing machine-checkable proofs.
 We welcome collaboration from researchers, students, and practitioners.
@@ -8,13 +10,13 @@ We welcome collaboration from researchers, students, and practitioners.
 
 ### Books
 - Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.
-  - Contributors: (TBD)
+  - Contributors: Chenyi Li, Min Cui, Qiming Dai, Shu Miao, Wanli Ma, Yi Yuan, Zichen Wang, Ziyu Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/Analysis2_Tao_2022/Book.lean)
 - R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.
-  - Contributors: (TBD)
+  - Contributors: Changyu Zou, Chenyi Li, Guangxuan Pan, Pengfei Hao, Qiming Dai, Shu Miao, Siyuan Shao, Suwan Wu, Wanli Ma, Weiran Shi, Xinyi Guo, Xuran Sun, Yifan Bai, Yijie Wang, Yunfei Zhang, Yunxi Duan, Yuhao Jiang, Zebo Liu, Zhiyan Wang, Zichen Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01_part1.html) | [Lean source](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean)
 - Jiri Lebl, *Introduction to Real Analysis, Volume I*, version 6.2, May 23, 2025, (TBD: publisher/city), (TBD: ISBN).
-  - Contributors: (TBD)
+  - Contributors: Zichen Wang.
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html) | [Lean source](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
 - Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.
   - Contributors: (TBD)
