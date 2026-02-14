@@ -102,6 +102,33 @@ If generated artifacts were previously committed, untrack them (without deleting
 - Great Bay University
 - National Natural Science Foundation of China
 
+## Lean Projects
+
+### Formalization Platform
+
+- [ReasLab](https://prove.reaslab.io)
+  - An online Lean formalization platform for collaborative theorem development and verification.
+
+### Formalization Projects
+
+- [Optlib](https://github.com/optsuite/optlib)
+  - A Lean4 library for mathematical optimization, covering convex analysis, optimality conditions, and algorithm convergence.
+- [ReasBook](https://github.com/optsuite/ReasBook)
+  - A Lean4 project for textbook and paper formalization, including both theorem proving and computational problems.
+
+### Benchmark
+
+- [AMBER](https://github.com/optsuite/AMBER)
+  - A Lean4 benchmark for applied mathematics formalization including proving and computational problems.
+
+### Autoformalization and Theorem Proving Systems
+
+- [M2F](https://github.com/optsuite/M2F)
+  - A toolkit for converting natural-language mathematical textbooks into formalization-ready Lean projects.
+
+- [SITA](https://github.com/chenyili0818/SITA)
+  - A structure-to-instance autoformalization framework for generating Lean definitions/theorems with verification feedback.
+
 ## Publications
 
 ### Formalization of Optimization
