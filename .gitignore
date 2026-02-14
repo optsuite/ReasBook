@@ -17,3 +17,13 @@ ReasBookWeb/Book/
 **/*.c
 **/*.bc
 **/*.o
+
+# OS / editor junk
+.DS_Store
+**/.DS_Store
+.DS_store
+**/.DS_store
+Thumbs.db
+**/Thumbs.db
+Desktop.ini
+**/Desktop.ini
