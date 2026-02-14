@@ -55,6 +55,12 @@ jobs:
       - name: Build main project docs (doc-gen4)
         run: |
           ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
+          for entry in Books/*/Book.lean Papers/*/Paper.lean; do
+            [ -f "$entry" ] || continue
+            mod="${entry%.lean}"
+            mod="${mod//\//.}"
+            ~/.elan/bin/lake -R -Kenv=dev build "$mod:docs"
+          done
         working-directory: ReasBook
 
       - name: Build main project
