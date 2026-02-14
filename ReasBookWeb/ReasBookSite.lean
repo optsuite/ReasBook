@@ -19,9 +19,10 @@ def navLinkRewriteScript : String :=
   "(function(){" ++
   "const siteRoot='/ReasBook/';" ++
   "const isExternal=(h)=>/^(?:[a-z]+:)?\\/\\//i.test(h);" ++
+  "const isSpecial=(h)=>h.startsWith('#')||h.startsWith('mailto:')||h.startsWith('tel:');" ++
   "const normalize=(href)=>{" ++
   "if(!href)return href;" ++
-  "if(href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('tel:'))return href;" ++
+  "if(isSpecial(href))return href;" ++
   "if(isExternal(href))return href;" ++
   "if(href==='/'||href==='/index.html')return siteRoot;" ++
   "if(href==='/docs'||href==='/docs/')return siteRoot+'docs/';" ++
@@ -29,14 +30,33 @@ def navLinkRewriteScript : String :=
   "if(href.startsWith('/'))return siteRoot+href.slice(1);" ++
   "return siteRoot+href.replace(/^\\.?\\//,'');" ++
   "};" ++
-  "const rewrite=()=>{" ++
+  "const rewriteAll=()=>{" ++
   "for(const a of document.querySelectorAll('a[href]')){" ++
   "const oldHref=(a.getAttribute('href')||'').trim();" ++
   "const newHref=normalize(oldHref);" ++
   "if(newHref&&newHref!==oldHref)a.setAttribute('href',newHref);" ++
   "}" ++
   "};" ++
-  "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',rewrite);else rewrite();" ++
+  "const onClick=(ev)=>{" ++
+  "if(ev.defaultPrevented||ev.button!==0||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey)return;" ++
+  "const a=ev.target&&ev.target.closest?ev.target.closest('a[href]'):null;" ++
+  "if(!a)return;" ++
+  "if((a.getAttribute('target')||'').toLowerCase()==='_blank')return;" ++
+  "const oldHref=(a.getAttribute('href')||'').trim();" ++
+  "if(!oldHref||isExternal(oldHref)||isSpecial(oldHref))return;" ++
+  "const newHref=normalize(oldHref);" ++
+  "if(!newHref)return;" ++
+  "if(newHref!==oldHref)a.setAttribute('href',newHref);" ++
+  "ev.preventDefault();" ++
+  "window.location.assign(newHref);" ++
+  "};" ++
+  "const boot=()=>{" ++
+  "rewriteAll();" ++
+  "document.addEventListener('click',onClick,true);" ++
+  "const mo=new MutationObserver(()=>rewriteAll());" ++
+  "mo.observe(document.documentElement,{subtree:true,childList:true});" ++
+  "};" ++
+  "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();" ++
   "})();"
 
 def theme : Theme := { Theme.default with
