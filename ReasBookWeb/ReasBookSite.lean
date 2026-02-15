@@ -1,7 +1,6 @@
 import VersoBlog
 import ReasBookSite.Home
 import ReasBookSite.LiterateModule
-import ReasBookSite.NavData
 import ReasBookSite.Sections
 import ReasBookSite.RouteTable
 import Book
@@ -14,7 +13,7 @@ open Output Html Template Theme
 
 def siteRoot : String := "/ReasBook/"
 def siteRootScript : String := s!"window.__versoSiteRoot=\"{siteRoot}\""
-def navDataScript : String := s!"window.__reasbookNavData={ReasBookSite.NavData.navDataJson};"
+def sidebarDataScript : String := s!"window.__reasbookSidebarData={ReasBookSite.Sections.sidebarDataJson};"
 def docsRoot : String := s!"{siteRoot}docs/"
 def staticRoot : String := s!"{siteRoot}static/style.css"
 def navLinkRewriteScript : String := r##"
@@ -96,18 +95,11 @@ def navLinkRewriteScript : String := r##"
   }
 
   function boot() {
-    const navData = window.__reasbookNavData || { books: [], papers: [] };
+    const navData = window.__reasbookSidebarData || { books: [], papers: [] };
     const navRoot = document.getElementById("sidebar-nav-root");
 
     function trimSlashes(s) {
       return (s || "").replace(/^\/+|\/+$/g, "");
-    }
-
-    function currentRelPath() {
-      let p = window.location.pathname || "/";
-      if (p.startsWith(siteRoot)) p = p.slice(siteRoot.length);
-      else p = p.replace(/^\/+/, "");
-      return trimSlashes(p);
     }
 
     function mkItem(href, label) {
@@ -119,43 +111,48 @@ def navLinkRewriteScript : String := r##"
       return li;
     }
 
-    function renderDefaultNav(list) {
-      list.appendChild(mkItem(siteRoot, "Home"));
-      list.appendChild(mkItem(siteRoot + "docs/", "Documentation"));
-      for (const w of [...(navData.books || []), ...(navData.papers || [])]) {
-        list.appendChild(mkItem(siteRoot + trimSlashes(w.homeRoute) + "/", w.title));
+    function mkSectionGroup(title, works) {
+      const li = document.createElement("li");
+      const details = document.createElement("details");
+      details.open = true;
+      const summary = document.createElement("summary");
+      summary.textContent = title;
+      details.appendChild(summary);
+
+      const workList = document.createElement("ul");
+      for (const w of works || []) {
+        const workLi = document.createElement("li");
+        const workDetails = document.createElement("details");
+        const workSummary = document.createElement("summary");
+        workSummary.textContent = w.title;
+        workDetails.appendChild(workSummary);
+
+        const sectionList = document.createElement("ul");
+        for (const s of (w.sections || [])) {
+          sectionList.appendChild(mkItem(siteRoot + trimSlashes(s.route) + "/", s.title));
+        }
+        workDetails.appendChild(sectionList);
+        workLi.appendChild(workDetails);
+        workList.appendChild(workLi);
       }
+
+      details.appendChild(workList);
+      li.appendChild(details);
+      return li;
     }
 
-    function renderWorkNav(list, work) {
+    function renderGroupedNav(list) {
       list.appendChild(mkItem(siteRoot, "Home"));
       list.appendChild(mkItem(siteRoot + "docs/", "Documentation"));
-      list.appendChild(mkItem(siteRoot + trimSlashes(work.homeRoute) + "/", work.title + " Home"));
-      for (const s of work.sections || []) {
-        list.appendChild(mkItem(siteRoot + trimSlashes(s.route) + "/", s.title));
-      }
+      list.appendChild(mkSectionGroup("Books", navData.books || []));
+      list.appendChild(mkSectionGroup("Papers", navData.papers || []));
     }
 
     function renderSidebarNav() {
       if (!navRoot) return;
       navRoot.innerHTML = "";
       const list = document.createElement("ol");
-
-      const rel = currentRelPath();
-      const parts = rel.split("/").filter(Boolean);
-      if (parts.length >= 2 && (parts[0] === "books" || parts[0] === "papers")) {
-        const slug = parts[1];
-        const works = parts[0] === "books" ? (navData.books || []) : (navData.papers || []);
-        const work = works.find((w) => w.slug === slug);
-        if (work) {
-          renderWorkNav(list, work);
-        } else {
-          renderDefaultNav(list);
-        }
-      } else {
-        renderDefaultNav(list);
-      }
-
+      renderGroupedNav(list);
       navRoot.appendChild(list);
     }
 
@@ -179,7 +176,7 @@ def theme : Theme := { Theme.default with
           <title>{{ (← param (α := String) "title") }} " -- ReasBook "</title>
           <link rel="stylesheet" href="/ReasBook/static/style.css"/>
           <script>{{ siteRootScript }}</script>
-          <script>{{ navDataScript }}</script>
+          <script>{{ sidebarDataScript }}</script>
           <script>{{ navLinkRewriteScript }}</script>
           {{← builtinHeader }}
         </head>

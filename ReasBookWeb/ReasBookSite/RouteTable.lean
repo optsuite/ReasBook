@@ -15,7 +15,6 @@ macro_rules
   | `(dir_spec| reasbook_site_dir) =>
     `(dir_spec| /
       static "static" ← "./static_files"
-      "books/analysis2_tao_2022/home/" Book.Books.Analysis2_Tao_2022.VersoHome
       "books/analysis2_tao_2022/chapters/chap01/section01/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01
       "books/analysis2_tao_2022/chapters/chap01/section01_part1/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01_part1
       "books/analysis2_tao_2022/chapters/chap01/section01_part2/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01_part2
@@ -67,7 +66,6 @@ macro_rules
       "books/analysis2_tao_2022/chapters/chap05/section05/" Book.Books.Analysis2_Tao_2022.Chapters.Chap05.section05
       "books/analysis2_tao_2022/chapters/chap06/section01/" Book.Books.Analysis2_Tao_2022.Chapters.Chap06.section01
       "books/analysis2_tao_2022/chapters/chap06/section02/" Book.Books.Analysis2_Tao_2022.Chapters.Chap06.section02
-      "books/convexanalysis_rockafellar_1970/home/" Book.Books.ConvexAnalysis_Rockafellar_1970.VersoHome
       "books/convexanalysis_rockafellar_1970/chapters/chap01/section01/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01
       "books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part1/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01_part1
       "books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part2/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01_part2
@@ -286,7 +284,6 @@ macro_rules
       "books/convexanalysis_rockafellar_1970/chapters/chap04/section20/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20
       "books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part1/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20_part1
       "books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part2/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20_part2
-      "books/introductiontorealanalysisvolumei_jirilebl_2025/home/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.VersoHome
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part1/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03_part1
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part2/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03_part2
@@ -334,7 +331,6 @@ macro_rules
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section04/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section04
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section05/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section05
       "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section06/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section06
-      "papers/onsomelocalrings_maassaran_2025/home/" Book.Papers.OnSomeLocalRings_Maassaran_2025.VersoHome
       "papers/onsomelocalrings_maassaran_2025/paper/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Paper
       "papers/onsomelocalrings_maassaran_2025/sections/section01/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section01
       "papers/onsomelocalrings_maassaran_2025/sections/section01_part1/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section01_part1
@@ -344,7 +340,6 @@ macro_rules
       "papers/onsomelocalrings_maassaran_2025/sections/section02_part2/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part2
       "papers/onsomelocalrings_maassaran_2025/sections/section02_part3/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part3
       "papers/onsomelocalrings_maassaran_2025/sections/section02_part4/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part4
-      "papers/smoothminimization_nesterov_2004/home/" Book.Papers.SmoothMinimization_Nesterov_2004.VersoHome
       "papers/smoothminimization_nesterov_2004/paper/" Book.Papers.SmoothMinimization_Nesterov_2004.Paper
       "papers/smoothminimization_nesterov_2004/sections/section01/" Book.Papers.SmoothMinimization_Nesterov_2004.Sections.section01
       "papers/smoothminimization_nesterov_2004/sections/section02/" Book.Papers.SmoothMinimization_Nesterov_2004.Sections.section02
@@ -375,7 +370,6 @@ macro_rules
 
 def reasbook_site : Site := site ReasBookSite.Home /
   static "static" ← "./static_files"
-  "books/analysis2_tao_2022/home/" Book.Books.Analysis2_Tao_2022.VersoHome
   "books/analysis2_tao_2022/chapters/chap01/section01/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01
   "books/analysis2_tao_2022/chapters/chap01/section01_part1/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01_part1
   "books/analysis2_tao_2022/chapters/chap01/section01_part2/" Book.Books.Analysis2_Tao_2022.Chapters.Chap01.section01_part2
@@ -427,7 +421,6 @@ def reasbook_site : Site := site ReasBookSite.Home /
   "books/analysis2_tao_2022/chapters/chap05/section05/" Book.Books.Analysis2_Tao_2022.Chapters.Chap05.section05
   "books/analysis2_tao_2022/chapters/chap06/section01/" Book.Books.Analysis2_Tao_2022.Chapters.Chap06.section01
   "books/analysis2_tao_2022/chapters/chap06/section02/" Book.Books.Analysis2_Tao_2022.Chapters.Chap06.section02
-  "books/convexanalysis_rockafellar_1970/home/" Book.Books.ConvexAnalysis_Rockafellar_1970.VersoHome
   "books/convexanalysis_rockafellar_1970/chapters/chap01/section01/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01
   "books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part1/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01_part1
   "books/convexanalysis_rockafellar_1970/chapters/chap01/section01_part2/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap01.section01_part2
@@ -646,7 +639,6 @@ def reasbook_site : Site := site ReasBookSite.Home /
   "books/convexanalysis_rockafellar_1970/chapters/chap04/section20/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20
   "books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part1/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20_part1
   "books/convexanalysis_rockafellar_1970/chapters/chap04/section20_part2/" Book.Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap04.section20_part2
-  "books/introductiontorealanalysisvolumei_jirilebl_2025/home/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.VersoHome
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part1/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03_part1
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03_part2/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03_part2
@@ -694,7 +686,6 @@ def reasbook_site : Site := site ReasBookSite.Home /
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section04/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section04
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section05/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section05
   "books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap07/section06/" Book.Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap07.section06
-  "papers/onsomelocalrings_maassaran_2025/home/" Book.Papers.OnSomeLocalRings_Maassaran_2025.VersoHome
   "papers/onsomelocalrings_maassaran_2025/paper/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Paper
   "papers/onsomelocalrings_maassaran_2025/sections/section01/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section01
   "papers/onsomelocalrings_maassaran_2025/sections/section01_part1/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section01_part1
@@ -704,7 +695,6 @@ def reasbook_site : Site := site ReasBookSite.Home /
   "papers/onsomelocalrings_maassaran_2025/sections/section02_part2/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part2
   "papers/onsomelocalrings_maassaran_2025/sections/section02_part3/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part3
   "papers/onsomelocalrings_maassaran_2025/sections/section02_part4/" Book.Papers.OnSomeLocalRings_Maassaran_2025.Sections.section02_part4
-  "papers/smoothminimization_nesterov_2004/home/" Book.Papers.SmoothMinimization_Nesterov_2004.VersoHome
   "papers/smoothminimization_nesterov_2004/paper/" Book.Papers.SmoothMinimization_Nesterov_2004.Paper
   "papers/smoothminimization_nesterov_2004/sections/section01/" Book.Papers.SmoothMinimization_Nesterov_2004.Sections.section01
   "papers/smoothminimization_nesterov_2004/sections/section02/" Book.Papers.SmoothMinimization_Nesterov_2004.Sections.section02

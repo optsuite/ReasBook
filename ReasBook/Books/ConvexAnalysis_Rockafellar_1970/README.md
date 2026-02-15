@@ -1,6 +1,6 @@
 # Convex Analysis (Rockafellar, 1970)
 
-- Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/home/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean)
+- Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Book.lean)
 
 ## Chapter 01 -- Part I: Basic Concepts
 

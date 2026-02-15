@@ -1,6 +1,6 @@
 # Smooth Minimization (Nesterov, 2004)
 
-- Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/home/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Paper.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
+- Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/sections/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Paper.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004/Paper.lean)
 
 ## Sections
 

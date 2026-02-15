@@ -1,6 +1,6 @@
 # Analysis II (Tao, 2022)
 
-- Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/home/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/Analysis2_Tao_2022/Book.lean)
+- Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/Analysis2_Tao_2022/Book.lean)
 
 ## Chapter 01 -- Metric Spaces
 

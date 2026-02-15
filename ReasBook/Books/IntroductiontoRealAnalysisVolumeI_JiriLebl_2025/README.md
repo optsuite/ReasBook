@@ -1,6 +1,6 @@
 # Introduction to Real Analysis, Volume I (Jiri Lebl, 2025)
 
-- Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/home/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
+- Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/blob/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Book.lean)
 
 ## Chapter 00
 
