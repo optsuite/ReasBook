@@ -332,6 +332,17 @@ def entry_label(e: Entry) -> str:
     return section_title_from_stem(e.stem)
 
 
+def readme_label(e: Entry) -> str:
+    base = entry_label(e)
+    if not base:
+        return ""
+    if e.category == "books":
+        return f"{e.chapter_num}.{e.section_num} {base}"
+    if e.category == "papers":
+        return f"Section {e.section_num}: {base}"
+    return base
+
+
 def book_title(book: str) -> str:
     if book in BOOK_TITLES:
         return BOOK_TITLES[book]
@@ -739,7 +750,7 @@ def write_book_readmes(source_root: Path, entries: list[Entry]) -> None:
                     current_chapter = e.chapter_num
                     out.append(f"## {chapter_title_for_book(book, current_chapter)}")
                     out.append("")
-                label = entry_label(e)
+                label = readme_label(e)
                 if not label:
                     continue
                 out.append(
@@ -802,7 +813,7 @@ def write_paper_readmes(source_root: Path, entries: list[Entry]) -> None:
             out.append("## Sections")
             out.append("")
             for e in item_entries:
-                label = entry_label(e)
+                label = readme_label(e)
                 if not label:
                     continue
                 out.append(

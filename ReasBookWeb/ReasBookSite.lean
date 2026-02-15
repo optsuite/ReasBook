@@ -162,11 +162,6 @@ def navLinkRewriteScript : String := r##"
     renderSidebarNav();
     rewriteAllAnchors();
     document.addEventListener("click", onClick, true);
-    const mo = new MutationObserver(() => {
-      renderSidebarNav();
-      rewriteAllAnchors();
-    });
-    mo.observe(document.documentElement, { subtree: true, childList: true });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
