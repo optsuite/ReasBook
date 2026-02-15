@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Zichen Wang. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Zichen Wang, Zaiwen Wen
+-/
+
 -- Aggregated imports for textbook formalization checks.
 import Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap00.section03
 import Books.IntroductiontoRealAnalysisVolumeI_JiriLebl_2025.Chapters.Chap01.section01

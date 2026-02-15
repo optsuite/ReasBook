@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Zichen Wang. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Zichen Wang, Wanli Ma, Qiming Dai, Zaiwen Wen
+-/
+
 import Mathlib
 import Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap02.section07_part9
 import Books.ConvexAnalysis_Rockafellar_1970.Chapters.Chap02.section09_part7

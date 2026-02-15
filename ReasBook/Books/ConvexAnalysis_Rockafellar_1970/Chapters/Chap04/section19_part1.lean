@@ -1,3 +1,9 @@
+/-
+Copyright (c) 2026 Zichen Wang. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Zichen Wang, Wanli Ma, Xinyi Guo, Siyuan Shao, Zaiwen Wen
+-/
+
 import Mathlib
 import Mathlib.LinearAlgebra.Projection
 
