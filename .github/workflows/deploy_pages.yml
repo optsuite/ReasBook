@@ -23,36 +23,29 @@ jobs:
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Restore main project cache if available
+      - name: Restore Lake caches if available
         uses: actions/cache/restore@v4
         with:
           path: |
             ReasBook/.lake
-          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-main-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Restore ReasBookWeb project cache if available
-        uses: actions/cache/restore@v4
-        with:
-          path: |
             ReasBookWeb/.lake
-          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
+            ReasBook/Books/*/.lake
+            ReasBook/Papers/*/.lake
+          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
-            lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-
+            lake-all-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Force clean site output only
+      - name: Force clean site outputs
         run: |
           rm -rf ReasBookWeb/_site
+          rm -rf .site
 
-      # Mathlib cache
-      - name: Get Mathlib cache (main project)
+      - name: Get Mathlib cache (shared main project)
         run: |
           ~/.elan/bin/lake exe cache get || true
         working-directory: ReasBook
 
-      # Build main project API docs
-      - name: Build main project docs (doc-gen4)
+      - name: Build shared main project (for legacy docs + tools)
         run: |
           ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
           for entry in Books/*/Book.lean Papers/*/Paper.lean; do
@@ -61,88 +54,93 @@ jobs:
             mod="${mod//\//.}"
             ~/.elan/bin/lake -R -Kenv=dev build "$mod:docs"
           done
-        working-directory: ReasBook
-
-      - name: Build main project
-        run: |
           ~/.elan/bin/lake build
         working-directory: ReasBook
 
-      # Generate Sections/Routes before building the site
-      - name: Generate sections/routes
+      - name: Generate legacy umbrella site sections/routes
         run: |
           python3 scripts/gen_sections.py
         working-directory: ReasBookWeb
 
-      - name: Build Verso site
+      - name: Build legacy umbrella Verso site (landing page)
         run: |
           ~/.elan/bin/lake exe reasbook-site
         working-directory: ReasBookWeb
 
-      # Copy main project docs into site as /docs
-      - name: Copy main docs into site as /docs
+      - name: Build independent book/paper projects
         run: |
-          mkdir -p ReasBookWeb/_site/docs
-          cp -r ReasBook/.lake/build/doc/. ReasBookWeb/_site/docs/
-          find ReasBookWeb/_site/docs -name "*.trace" -delete || true
-          find ReasBookWeb/_site/docs -name "*.hash" -delete || true
-          if [ ! -f ReasBookWeb/_site/docs/index.html ]; then
-            {
-              echo '<!doctype html>'
-              echo '<html lang="en">'
-              echo '<head>'
-              echo '  <meta charset="utf-8" />'
-              echo '  <meta name="viewport" content="width=device-width, initial-scale=1" />'
-              echo '  <title>ReasBook Documentation</title>'
-              echo '</head>'
-              echo '<body>'
-              echo '  <h1>ReasBook Documentation</h1>'
-              echo '  <ul>'
-              echo '    <li><a href="./Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html">Analysis II (Tao): Chapter 1 Section 1</a></li>'
-              echo '    <li><a href="./Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01_part1.html">Convex Analysis (Rockafellar): Chapter 1 Section 1 Part 1</a></li>'
-              echo '    <li><a href="./Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html">Introduction to Real Analysis I (Lebl): Chapter 1 Section 1</a></li>'
-              echo '    <li><a href="./Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html">Nesterov 2004: Section 1</a></li>'
-              echo '    <li><a href="./Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html">Maassarani 2025: Section 1</a></li>'
-              echo '  </ul>'
-              echo '</body>'
-              echo '</html>'
-            } > ReasBookWeb/_site/docs/index.html
+          set -euo pipefail
+          for proj in ReasBook/Books/* ReasBook/Papers/*; do
+            [ -d "$proj" ] || continue
+            [ -x "$proj/build.sh" ] || continue
+            echo "Building independent project: $proj"
+            (cd "$proj" && ./build.sh)
+          done
+
+      - name: Assemble Pages artifact tree
+        run: |
+          set -euo pipefail
+          mkdir -p .site
+
+          # Keep the legacy umbrella site as root landing pages.
+          cp -r ReasBookWeb/_site/. .site/
+
+          # Expose each independent project under /books/<slug>/ and /papers/<slug>/.
+          for proj in ReasBook/Books/* ReasBook/Papers/*; do
+            [ -d "$proj" ] || continue
+            [ -d "$proj/_site" ] || continue
+
+            kind="$(basename "$(dirname "$proj")" | tr '[:upper:]' '[:lower:]')"
+            name="$(basename "$proj")"
+            slug="$(echo "$name" | tr '[:upper:]' '[:lower:]')"
+
+            out_dir=".site/$kind/$slug"
+            mkdir -p "$out_dir"
+            cp -r "$proj/_site/." "$out_dir/"
+
+            if [ -d "$proj/.lake/build/doc" ]; then
+              doc_dir=".site/docs/${kind^}/$name"
+              mkdir -p "$doc_dir"
+              cp -r "$proj/.lake/build/doc/." "$doc_dir/"
+              find "$doc_dir" -name "*.trace" -delete || true
+              find "$doc_dir" -name "*.hash" -delete || true
+            fi
+          done
+
+          # Preserve shared legacy docs under /docs-shared for compatibility.
+          if [ -d ReasBook/.lake/build/doc ]; then
+            mkdir -p .site/docs-shared
+            cp -r ReasBook/.lake/build/doc/. .site/docs-shared/
+            find .site/docs-shared -name "*.trace" -delete || true
+            find .site/docs-shared -name "*.hash" -delete || true
           fi
 
       - name: Verify generated site tree
         run: |
           echo "Commit: $GITHUB_SHA"
-          echo "Top-level _site entries:"
-          ls -la ReasBookWeb/_site
-          echo "Top-level _site/docs entries:"
-          ls -la ReasBookWeb/_site/docs
-          echo "Check site root injection in generated HTML:"
-          grep -R --line-number "__versoSiteRoot" ReasBookWeb/_site | head -n 20
-          echo "Check <base href> in generated HTML:"
-          grep -R --line-number '<base href="/ReasBook/"/>' ReasBookWeb/_site | head -n 20
-          echo "Check for known bad duplicated path pattern:"
-          ! grep -R --line-number 'chap01/books/' ReasBookWeb/_site
-          test -f ReasBookWeb/_site/index.html
-          test -f ReasBookWeb/_site/docs/index.html
+          echo "Top-level .site entries:"
+          ls -la .site
+          test -f .site/index.html
+          test -d .site/books
+          test -d .site/papers
+          test -d .site/docs
+          # Quick smoke check for at least one independent route.
+          test -f .site/books/analysis2_tao_2022/chapters/chap01/section01/index.html
 
-      - name: Save main project cache
+      - name: Save Lake caches
         uses: actions/cache/save@v4
         with:
           path: |
             ReasBook/.lake
-          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
-
-      - name: Save ReasBookWeb project cache
-        uses: actions/cache/save@v4
-        with:
-          path: |
             ReasBookWeb/.lake
-          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
+            ReasBook/Books/*/.lake
+            ReasBook/Papers/*/.lake
+          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ReasBookWeb/_site
+          path: .site
 
   deploy:
     needs: build

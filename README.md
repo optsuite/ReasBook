@@ -20,7 +20,7 @@ ReasBook is generated using the tool: [M2F](https://github.com/optsuite/M2F.git)
   - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap00/section03.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters) | [README](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/README.md)
 - [Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014)
   - Contributors: Binghe Huang, Chenglin Li, Chenrui Yang, Chenxi Liu, Congyuan Lei, Dongye Song, Fuzhi Wang, Haodong Zhang, Jiangnan Song, Jinmin Song, Junze Qiao, Junzhe Lai, Kaiwen He, Liming Han, Lurong Yang, Meng Zhou, Pengqi Lei, Renran Luo, Siyan Chen, Wangqi Liu, Wenxin Zeng, Wanli Ma, Wenxuan Wu, Xinru Zhu, Xu Han, Xutianshi Tao, Yichao Guo, Youyou Qin, Yuhan Zhang, Yushen Guo, Yutong Zhang, Ze Zhai, Zheng Ma, Zhiyong Chen, Zichen Wang, Zichen Xu, Zihao Liu.
-  - Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD) | [README](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
+  - Links: [Verso](https://optsuite.github.io/ReasBook/books/integerprogramming_conforti_2014/book/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntegerProgramming_Conforti_2014/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014) | [README](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
 
 ### Papers
 - [Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004)
@@ -32,7 +32,8 @@ ReasBook is generated using the tool: [M2F](https://github.com/optsuite/M2F.git)
 
 ## Repository Layout
 
-The repository is organized into a Lean source tree and a web-documentation tree:
+The repository now keeps a shared Lean source tree (`ReasBook/`) and also gives each book/paper directory
+its own independent Lean project files (`lakefile.lean`, `lean-toolchain`, `build.sh`, `ProjectSite/`):
 
 ```text
 ReasBook/
@@ -76,6 +77,13 @@ Examples:
 From the repository root:
 
 ```bash
+./build.sh
+```
+
+Build an independent book/paper project (example):
+
+```bash
+cd ReasBook/Books/Analysis2_Tao_2022
 ./build.sh
 ```
 
