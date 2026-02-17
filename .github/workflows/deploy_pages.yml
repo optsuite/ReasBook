@@ -155,8 +155,10 @@ jobs:
           set -euo pipefail
           cd "${{ matrix.project.path }}"
           python3 ../../../scripts/gen_project_site.py .
-          ~/.elan/bin/lake exe cache get || true
-          ~/.elan/bin/lake exe "${{ matrix.project.exe }}"
+          ~/.elan/bin/lake -R exe cache get || true
+          rm -rf .lake/build/literate
+          rm -rf .lake/build/lib/lean/ProjectSite .lake/build/ir/ProjectSite
+          ~/.elan/bin/lake -R exe "${{ matrix.project.exe }}"
 
       - name: Stage pages artifact
         run: |
@@ -199,7 +201,7 @@ jobs:
         run: |
           set -euo pipefail
           cd "${{ matrix.project.path }}"
-          ~/.elan/bin/lake exe cache get || true
+          ~/.elan/bin/lake -R exe cache get || true
           ~/.elan/bin/lake -R -Kenv=dev build "${{ matrix.project.docsModule }}:docs" || true
 
       - name: Stage docs artifact
