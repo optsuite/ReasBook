@@ -114,11 +114,48 @@ def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
   | .ok val => pure val
 
 where
+  positionFromJsonLegacy (json : Json) : Except String Lean.Position := do
+    let line ← json.getObjValAs? Nat "line"
+    let col ← json.getObjValAs? Nat "column"
+    pure {line, column := col - 1}
+
+  rangeFromJsonCompat (json : Json) : Except String (Option (Lean.Position × Lean.Position)) := do
+    match SubVerso.Module.rangeFromJson json with
+    | .ok r => pure r
+    | .error _ =>
+      if json.isNull then
+        pure none
+      else
+        match json with
+        | .arr arr =>
+          if h : arr.size = 2 then
+            let s := arr[0]
+            let e := arr[1]
+            pure (some (← positionFromJsonLegacy s, ← positionFromJsonLegacy e))
+          else
+            throw "Expected null or a 2-element range array"
+        | _ =>
+          throw "Expected range object or legacy 2-element range array"
+
+  moduleItemFromJsonCompat (v : Json) : Except String ModuleItem := do
+    match FromJson.fromJson? (α := ModuleItem) v with
+    | .ok item => pure item
+    | .error _ =>
+      let range ← v.getObjVal? "range" >>= rangeFromJsonCompat
+      let kind ← v.getObjValAs? String "kind" <&> (·.toName)
+      let defines ← v.getObjValAs? (Array String) "defines" <&> (·.map (·.toName))
+      let code ← v.getObjValAs? Highlighted "code"
+      pure {range, kind, defines, code}
+
   deJson (v : Json) : Except String (ModuleItem × Array (String × Highlighted)) := do
-    let item ← FromJson.fromJson? (α := ModuleItem) v
-    let terms ← v.getObjVal? "terms"
-    let terms ← terms.getObj?
-    let terms ← terms.toArray.mapM fun ⟨k, v⟩ => (k, ·) <$> FromJson.fromJson? v
+    let item ← moduleItemFromJsonCompat v
+    let terms : Array (String × Highlighted) ←
+      match v.getObjVal? "terms" with
+      | .ok terms =>
+        let terms ← terms.getObj?
+        terms.toArray.mapM fun ⟨k, v⟩ => (k, ·) <$> FromJson.fromJson? v
+      | .error _ =>
+        pure #[]
     return (item, terms)
   decorateOut (name : String) (out : String) : String :=
     if out.isEmpty then "" else s!"\n{name}:\n{out}\n"
