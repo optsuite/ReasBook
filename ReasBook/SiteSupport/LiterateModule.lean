@@ -29,6 +29,19 @@ where getString : Highlighted → m String
 partial def getDocCommentString : Highlighted -> m String := getCommentString' "/--"
 end
 
+private def looksLikeModuleItem (v : Json) : Bool :=
+  match v.getObjVal? "kind", v.getObjVal? "code" with
+  | .ok _, .ok _ => true
+  | _, _ => false
+
+private partial def findModuleItemArray? (v : Json) : Option (Array Json) :=
+  match v with
+  | .arr xs =>
+    if xs.any looksLikeModuleItem then some xs else none
+  | .obj obj =>
+    (obj.toArray).findSome? fun (_, child) => findModuleItemArray? child
+  | _ => none
+
 def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
     (overrideToolchain : Option String := none) : IO (Array (ModuleItem × Array (String × Highlighted))) := do
 
@@ -101,19 +114,6 @@ def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
   | .ok val => pure val
 
 where
-  looksLikeModuleItem (v : Json) : Bool :=
-    match v.getObjVal? "kind", v.getObjVal? "code" with
-    | .ok _, .ok _ => true
-    | _, _ => false
-
-  partial findModuleItemArray? (v : Json) : Option (Array Json) :=
-    match v with
-    | .arr xs =>
-      if xs.any looksLikeModuleItem then some xs else none
-    | .obj obj =>
-      (obj.toArray).findSome? fun (_, child) => findModuleItemArray? child
-    | _ => none
-
   deJson (v : Json) : Except String (ModuleItem × Array (String × Highlighted)) := do
     let item ← FromJson.fromJson? (α := ModuleItem) v
     let terms ← v.getObjVal? "terms"
