@@ -98,20 +98,27 @@ def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
       IO.FS.readFile res.stdout.trim
     finally f.unlock
 
-  let json ←
+  let parsed ←
     match Json.parse jsonFile with
     | .error err =>
       throw <| IO.userError s!"Couldn't parse JSON from output file: {err}"
-    | .ok parsed =>
+    | .ok parsed => pure parsed
+
+  -- Newer SubVerso emits `{data, items}`; decode it first so `code` can be restored.
+  match FromJson.fromJson? (α := SubVerso.Module.Module) parsed with
+  | .ok mod => pure <| mod.items.map (fun item => (item, #[]))
+  | .error _ =>
+    -- Fallback for older extractor output: array of objects with optional `terms`.
+    let json ←
       match findModuleItemArray? parsed with
       | some json => pure json
       | none =>
         let sample := if jsonFile.length > 400 then jsonFile.take 400 ++ " ..." else jsonFile
         throw <| IO.userError s!"Couldn't find a module-item JSON array in literate output. Sample:\n{sample}"
-  match json.mapM deJson with
-  | .error err =>
-    throw <| IO.userError s!"Couldn't parse JSON from output file: {err}\nIn:\n{json}"
-  | .ok val => pure val
+    match json.mapM deJson with
+    | .error err =>
+      throw <| IO.userError s!"Couldn't parse JSON from output file: {err}\nIn:\n{json}"
+    | .ok val => pure val
 
 where
   positionFromJsonLegacy (json : Json) : Except String Lean.Position := do
