@@ -85,8 +85,18 @@ def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
       IO.FS.readFile res.stdout.trim
     finally f.unlock
 
-  let .ok (.arr json) := Json.parse jsonFile
-    | throw <| IO.userError s!"Expected JSON array"
+  let json ←
+    match Json.parse jsonFile with
+    | .ok (.arr json) => pure json
+    | .ok (.obj obj) =>
+      match obj.find? "items" <|> obj.find? "commands" with
+      | some (.arr json) => pure json
+      | _ =>
+        throw <| IO.userError s!"Expected JSON array or an object with an array field 'items'/'commands'"
+    | .ok _ =>
+      throw <| IO.userError s!"Expected JSON array"
+    | .error err =>
+      throw <| IO.userError s!"Couldn't parse JSON from output file: {err}"
   match json.mapM deJson with
   | .error err =>
     throw <| IO.userError s!"Couldn't parse JSON from output file: {err}\nIn:\n{json}"
