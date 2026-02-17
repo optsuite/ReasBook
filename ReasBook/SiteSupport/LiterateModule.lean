@@ -87,16 +87,21 @@ def loadModuleContent (mod : String) (leanProject : System.FilePath := ".")
 
   let json ←
     match Json.parse jsonFile with
-    | .ok (.arr json) => pure json
-    | .ok (.obj obj) =>
-      match obj.find? "items" <|> obj.find? "commands" with
-      | some (.arr json) => pure json
-      | _ =>
-        throw <| IO.userError s!"Expected JSON array or an object with an array field 'items'/'commands'"
-    | .ok _ =>
-      throw <| IO.userError s!"Expected JSON array"
     | .error err =>
       throw <| IO.userError s!"Couldn't parse JSON from output file: {err}"
+    | .ok parsed =>
+      match parsed with
+      | .arr json => pure json
+      | .obj _ =>
+        match parsed.getObjVal? "items" with
+        | .ok (.arr json) => pure json
+        | _ =>
+          match parsed.getObjVal? "commands" with
+          | .ok (.arr json) => pure json
+          | _ =>
+            throw <| IO.userError s!"Expected JSON array or an object with an array field 'items'/'commands'"
+      | _ =>
+        throw <| IO.userError s!"Expected JSON array"
   match json.mapM deJson with
   | .error err =>
     throw <| IO.userError s!"Couldn't parse JSON from output file: {err}\nIn:\n{json}"
