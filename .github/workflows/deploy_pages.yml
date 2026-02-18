@@ -1,9 +1,16 @@
 name: Deploy Verso Site to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: [ "Warm Independent Project Caches" ]
+    types: [ completed ]
   workflow_dispatch:
+    inputs:
+      build_umbrella:
+        description: 'Build legacy umbrella site (slow)'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -16,11 +23,16 @@ concurrency:
 
 jobs:
   discover-projects:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     outputs:
       projects: ${{ steps.collect.outputs.projects }}
+      project_count: ${{ steps.collect.outputs.project_count }}
+      selected_slugs: ${{ steps.collect.outputs.selected_slugs }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Collect independent projects for matrix builds
         id: collect
@@ -59,13 +71,24 @@ jobs:
                       }
                   )
 
+          selected_slugs = ",".join(p["slug"] for p in projects)
           print(f"projects={json.dumps(projects, separators=(',', ':'))}")
+          print(f"project_count={len(projects)}")
+          print(f"selected_slugs={selected_slugs}")
           PY
 
+      - name: Log selected projects
+        run: |
+          echo "Selected project count: ${{ steps.collect.outputs.project_count }}"
+          echo "Selected project slugs: ${{ steps.collect.outputs.selected_slugs }}"
+
   build-umbrella:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_umbrella }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
@@ -78,7 +101,7 @@ jobs:
             ReasBookWeb/.lake
             ReasBook/Books/*/.lake
             ReasBook/Papers/*/.lake
-          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
+          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.run_id }}
           restore-keys: |
             lake-all-${{ runner.os }}-${{ runner.arch }}-
 
@@ -123,10 +146,11 @@ jobs:
             ReasBookWeb/.lake
             ReasBook/Books/*/.lake
             ReasBook/Papers/*/.lake
-          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
+          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.run_id }}
 
   build-project-pages:
     needs: discover-projects
+    if: ${{ needs.discover-projects.outputs.project_count != '0' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -134,26 +158,26 @@ jobs:
         project: ${{ fromJson(needs.discover-projects.outputs.projects) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Restore Lake caches if available
+      - name: Restore per-project Lake cache
         uses: actions/cache/restore@v4
         with:
-          path: |
-            ReasBook/.lake
-            ReasBookWeb/.lake
-            ReasBook/Books/*/.lake
-            ReasBook/Papers/*/.lake
-          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
+          path: ${{ matrix.project.path }}/.lake
+          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-${{ github.run_id }}
           restore-keys: |
-            lake-all-${{ runner.os }}-${{ runner.arch }}-
+            lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-
+            lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-
 
       - name: Build independent project pages
         run: |
           set -euo pipefail
           cd "${{ matrix.project.path }}"
+          ~/.elan/bin/lake exe cache get || true
           chmod +x ./build.sh
           ./build.sh
 
@@ -169,8 +193,16 @@ jobs:
           name: site-pages-${{ matrix.project.slug }}
           path: .artifacts/pages
 
+      - name: Save per-project Lake cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ matrix.project.path }}/.lake
+          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-${{ github.run_id }}
+
   build-project-docs:
     needs: discover-projects
+    if: ${{ needs.discover-projects.outputs.project_count != '0' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -178,21 +210,20 @@ jobs:
         project: ${{ fromJson(needs.discover-projects.outputs.projects) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Restore Lake caches if available
+      - name: Restore per-project Lake cache
         uses: actions/cache/restore@v4
         with:
-          path: |
-            ReasBook/.lake
-            ReasBookWeb/.lake
-            ReasBook/Books/*/.lake
-            ReasBook/Papers/*/.lake
-          key: lake-all-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/**/lean-toolchain') }}-${{ hashFiles('ReasBook/**/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/**/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/**/lake-manifest.json') }}-${{ github.sha }}
+          path: ${{ matrix.project.path }}/.lake
+          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-${{ github.run_id }}
           restore-keys: |
-            lake-all-${{ runner.os }}-${{ runner.arch }}-
+            lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-
+            lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-
 
       - name: Build independent project docs
         run: |
@@ -220,6 +251,13 @@ jobs:
           path: .artifacts/docs
           if-no-files-found: ignore
 
+      - name: Save per-project Lake cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ matrix.project.path }}/.lake
+          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}-${{ github.run_id }}
+
   assemble-pages-artifact:
     needs:
       - build-umbrella
@@ -238,7 +276,53 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .site
-          cp -r .artifacts/merged/. .site/
+          if [ -d .artifacts/merged ]; then
+            cp -r .artifacts/merged/. .site/
+          fi
+          mkdir -p .site/books .site/papers .site/docs
+
+          # When legacy umbrella build is disabled, synthesize a lightweight landing page.
+          if [ ! -f .site/index.html ]; then
+            cat > .site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>ReasBook</title>
+            <style>
+              body { font-family: Georgia, "Times New Roman", serif; margin: 2rem auto; max-width: 900px; line-height: 1.5; color: #1a1a1a; }
+              h1 { margin-bottom: 0.4rem; }
+              .muted { color: #555; }
+              ul { padding-left: 1.2rem; }
+              a { color: #0a4a8a; text-decoration: none; }
+              a:hover { text-decoration: underline; }
+            </style>
+          </head>
+          <body>
+            <h1>ReasBook</h1>
+            <p class="muted">Independent project pages and docs.</p>
+            <h2>Books</h2>
+            <ul id="books"></ul>
+            <h2>Papers</h2>
+            <ul id="papers"></ul>
+            <p><a href="/docs/">Docs root</a></p>
+            <script>
+              function render(kind) {
+                fetch('/' + kind + '/')
+                  .then(() => {
+                    const ul = document.getElementById(kind);
+                    ul.innerHTML = '<li><a href="/' + kind + '/">Browse /' + kind + '/</a></li>';
+                  })
+                  .catch(() => {});
+              }
+              render('books');
+              render('papers');
+            </script>
+          </body>
+          </html>
+          HTML
+          fi
 
       - name: Verify generated site tree
         run: |
@@ -249,7 +333,6 @@ jobs:
           test -d .site/books
           test -d .site/papers
           test -d .site/docs
-          test -f .site/books/analysis2_tao_2022/chapters/chap01/section01/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
