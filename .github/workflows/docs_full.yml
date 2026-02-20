@@ -2,6 +2,12 @@ name: Build Full Independent Docs
 
 on:
   workflow_dispatch:
+    inputs:
+      build_shared_docs:
+        description: 'Also build shared ReasBook:docs (slow, memory-heavy)'
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: '0 2 * * *'
 
@@ -102,6 +108,8 @@ jobs:
           path: .artifacts/docs
 
   build-shared-docs:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_shared_docs }}
+    timeout-minutes: 120
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -126,7 +134,7 @@ jobs:
           set -euo pipefail
           cd ReasBook
           ~/.elan/bin/lake -R exe cache get || true
-          ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
+          ~/.elan/bin/lake -R -Kenv=dev -j 1 build ReasBook:docs
 
       - name: Upload shared docs artifact
         uses: actions/upload-artifact@v4
