@@ -83,7 +83,6 @@ jobs:
           echo "Selected project slugs: ${{ steps.collect.outputs.selected_slugs }}"
 
   build-umbrella:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_umbrella }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

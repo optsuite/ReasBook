@@ -127,7 +127,6 @@ jobs:
           key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}
 
   build-shared-docs:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_shared_docs }}
     timeout-minutes: 120
     runs-on: ubuntu-latest
     steps:
