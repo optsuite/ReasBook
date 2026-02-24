@@ -6,6 +6,8 @@ import Books.Analysis2_Tao_2022.Chapters.Chap03
 import Books.Analysis2_Tao_2022.Chapters.Chap04
 import Books.Analysis2_Tao_2022.Chapters.Chap05
 import Books.Analysis2_Tao_2022.Chapters.Chap06
+import Books.Analysis2_Tao_2022.Chapters.Chap07
+import Books.Analysis2_Tao_2022.Chapters.Chap08
 -- END AUTO-IMPORTS
 
 /-

@@ -1,9 +1,3 @@
-/-
-  Copyright (c) 2026 Zichen Wang. All rights reserved.
-  Released under Apache 2.0 license as described in the file LICENSE.
-  Authors: Zichen Wang, Wanli Ma, Chenyi Li, Zaiwen Wen
-  -/
-
 import Mathlib
 
 section Chap02
@@ -119,15 +113,52 @@ def IsCocountableOpen (X : Type u) (E : Set X) : Prop :=
   E = ∅ ∨ (Set.univ \ E).Countable
 
 /-- The whole space is cocountable-open. -/
-lemma cocountable_isOpen_univ (X : Type u) : IsCocountableOpen X (Set.univ : Set X) := sorry
+lemma cocountable_isOpen_univ (X : Type u) : IsCocountableOpen X (Set.univ : Set X) := by
+  right
+  simpa using (Set.countable_empty : (∅ : Set X).Countable)
 
 /-- Intersections of cocountable-open sets are cocountable-open. -/
 lemma cocountable_isOpen_inter (X : Type u) (s t : Set X) :
-    IsCocountableOpen X s → IsCocountableOpen X t → IsCocountableOpen X (s ∩ t) := sorry
+    IsCocountableOpen X s → IsCocountableOpen X t → IsCocountableOpen X (s ∩ t) := by
+  intro hs ht
+  rcases hs with rfl | hsCount
+  · left
+    simp
+  · rcases ht with rfl | htCount
+    · left
+      simp
+    · right
+      simpa [Set.diff_inter] using hsCount.union htCount
 
 /-- Arbitrary unions of cocountable-open sets are cocountable-open. -/
 lemma cocountable_isOpen_sUnion (X : Type u) (S : Set (Set X)) :
-    (∀ t ∈ S, IsCocountableOpen X t) → IsCocountableOpen X (⋃₀ S) := sorry
+    (∀ t ∈ S, IsCocountableOpen X t) → IsCocountableOpen X (⋃₀ S) := by
+  intro hS
+  by_cases hUnion : (⋃₀ S : Set X) = ∅
+  · left
+    exact hUnion
+  · right
+    have hUnionNonempty : (⋃₀ S : Set X).Nonempty := by
+      by_contra hNonempty
+      apply hUnion
+      refine Set.eq_empty_iff_forall_notMem.mpr ?_
+      intro x hx
+      exact hNonempty ⟨x, hx⟩
+    rcases hUnionNonempty with ⟨x, hxUnion⟩
+    rcases Set.mem_sUnion.mp hxUnion with ⟨t, htS, hxT⟩
+    have htComplCount : (Set.univ \ t).Countable := by
+      rcases hS t htS with htEmpty | htCount
+      · exfalso
+        rw [htEmpty] at hxT
+        exact hxT
+      · exact htCount
+    have hsubset : Set.univ \ ⋃₀ S ⊆ Set.univ \ t := by
+      intro y hy
+      rcases hy with ⟨hyUniv, hyNotUnion⟩
+      refine ⟨hyUniv, ?_⟩
+      intro hyMemT
+      exact hyNotUnion (Set.mem_sUnion.mpr ⟨t, htS, hyMemT⟩)
+    exact Set.Countable.mono hsubset htComplCount
 
 /-- Definition 2.25 (Cocountable topology): Let `X` be a set. Define
 `𝓕 := {E ⊆ X | E = ∅ or X \ E is at most countable}`. The pair `(X, 𝓕)` is called the
@@ -179,7 +210,10 @@ theorem tendsto_ereal_top_iff_liminf_eq_top_and_tendsto_ereal_bot_iff_limsup_eq_
 /-- Proposition 2.25: Let `X` be a set and define `𝓕 := {∅, X}`. Then `(X, 𝓕)` is a topology on
 `X`, i.e. there is a topological structure whose open sets are exactly `∅` and `Set.univ`. -/
 theorem exists_topology_only_empty_univ (X : Type u) :
-    ∃ T : TopologicalSpace X, ∀ U : Set X, @IsOpen X T U ↔ U = ∅ ∨ U = Set.univ := sorry
+    ∃ T : TopologicalSpace X, ∀ U : Set X, @IsOpen X T U ↔ U = ∅ ∨ U = Set.univ := by
+  refine ⟨⊤, ?_⟩
+  intro U
+  simpa using (TopologicalSpace.isOpen_top_iff (U := U))
 
 /-- Definition 2.26: [First countable topological space] A topological space `(X, F)` is first
 countable if for every `x in X` there exists a countable collection of neighborhoods

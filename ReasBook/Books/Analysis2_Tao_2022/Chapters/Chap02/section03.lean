@@ -1,9 +1,3 @@
-/-
-  Copyright (c) 2026 Zichen Wang. All rights reserved.
-  Released under Apache 2.0 license as described in the file LICENSE.
-  Authors: Zichen Wang, Wanli Ma, Chenyi Li, Zaiwen Wen
-  -/
-
 import Mathlib
 
 section Chap02
@@ -67,7 +61,7 @@ abbrev IsUniformlyContinuous {X Y : Type*} [MetricSpace X] [MetricSpace Y] (f : 
 
 /-- The predicate `IsUniformlyContinuous` coincides with mathlib's `UniformContinuous`. -/
 lemma isUniformlyContinuous_iff_uniformContinuous {X Y : Type*} [MetricSpace X] [MetricSpace Y]
-    (f : X → Y) : IsUniformlyContinuous f ↔ UniformContinuous f := sorry
+    (f : X → Y) : IsUniformlyContinuous f ↔ UniformContinuous f := Iff.rfl
 
 /-- Theorem 2.7: Let `(X, d_X)` and `(Y, d_Y)` be metric spaces and assume `X` is compact. For a
 function `f : X → Y`, `f` is continuous on `X` if and only if `f` is uniformly continuous on `X`. -/
