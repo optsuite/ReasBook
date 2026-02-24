@@ -1,13 +1,7 @@
-name: Build Full Independent Docs
+name: Build Full Docs
 
 on:
   workflow_dispatch:
-    inputs:
-      build_shared_docs:
-        description: 'Also build shared ReasBook:docs (slow, memory-heavy)'
-        required: false
-        type: boolean
-        default: false
   schedule:
     - cron: '0 2 * * *'
 
@@ -15,142 +9,31 @@ permissions:
   contents: read
 
 jobs:
-  discover-projects:
+  build-docs:
     runs-on: ubuntu-latest
-    outputs:
-      projects: ${{ steps.collect.outputs.projects }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Collect independent projects for docs matrix
-        id: collect
-        run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          from pathlib import Path
-
-          root = Path("ReasBook")
-          projects = []
-
-          for kind_title, kind_dir, leaf in [
-              ("Books", root / "Books", "Book"),
-              ("Papers", root / "Papers", "Paper"),
-          ]:
-              if not kind_dir.is_dir():
-                  continue
-              for project in sorted(kind_dir.iterdir()):
-                  if not project.is_dir() or not (project / "build.sh").is_file():
-                      continue
-
-                  name = project.name
-                  slug = name.lower()
-                  docs_module = f"{kind_title}.{name}.{leaf}"
-
-                  projects.append(
-                      {
-                          "kindTitle": kind_title,
-                          "name": name,
-                          "slug": slug,
-                          "path": str(project),
-                          "docsModule": docs_module,
-                      }
-                  )
-
-          print(f"projects={json.dumps(projects, separators=(',', ':'))}")
-          PY
-
-  build-full-docs:
-    needs: discover-projects
-    timeout-minutes: 150
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        project: ${{ fromJson(needs.discover-projects.outputs.projects) }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Restore per-project Lake cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ${{ matrix.project.path }}/.lake
-          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}
-          restore-keys: |
-            lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-
-
-      - name: Build full docs for project
-        id: build_docs
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          cd "${{ matrix.project.path }}"
-          ~/.elan/bin/lake -R exe cache get || true
-          timeout --signal=TERM --kill-after=5m 90m \
-            ~/.elan/bin/lake -R -Kenv=dev build "${{ matrix.project.docsModule }}:docs"
-
-      - name: Log docs build outcome
-        if: always()
-        run: |
-          echo "Project: ${{ matrix.project.slug }}"
-          echo "Build outcome: ${{ steps.build_docs.outcome }}"
-
-      - name: Stage docs artifact
-        if: always()
-        run: |
-          set -euo pipefail
-          src="${{ matrix.project.path }}/.lake/build/doc"
-          out=".artifacts/docs/${{ matrix.project.kindTitle }}/${{ matrix.project.name }}"
-          if [ -d "$src" ]; then
-            mkdir -p "$out"
-            cp -r "$src/." "$out/"
-            find "$out" -name "*.trace" -delete || true
-            find "$out" -name "*.hash" -delete || true
-          fi
-
-      - name: Upload docs artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: full-docs-${{ matrix.project.slug }}
-          path: .artifacts/docs
-          if-no-files-found: ignore
-
-      - name: Save per-project Lake cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ matrix.project.path }}/.lake
-          key: lake-proj-${{ runner.os }}-${{ runner.arch }}-${{ matrix.project.slug }}-${{ hashFiles(format('{0}/lean-toolchain', matrix.project.path)) }}-${{ hashFiles(format('{0}/lake-manifest.json', matrix.project.path)) }}
-
-  build-shared-docs:
-    timeout-minutes: 120
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install elan (Lean toolchain manager)
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
-
-      - name: Restore Lake caches if available
+      - name: Restore shared Lake cache
         uses: actions/cache/restore@v4
         with:
           path: ReasBook/.lake
-          key: lake-shared-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          key: lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
           restore-keys: |
-            lake-shared-${{ runner.os }}-${{ runner.arch }}-
+            lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Build shared ReasBook docs
         run: |
           set -euo pipefail
           cd ReasBook
           ~/.elan/bin/lake -R exe cache get || true
-          ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
+          timeout --signal=TERM --kill-after=5m 150m ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
 
-      - name: Upload shared docs artifact
+      - name: Upload docs artifact
         uses: actions/upload-artifact@v4
         with:
           name: full-docs-shared
@@ -161,4 +44,4 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ReasBook/.lake
-          key: lake-shared-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          key: lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}

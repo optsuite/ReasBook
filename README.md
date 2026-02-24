@@ -32,8 +32,7 @@ ReasBook is generated using the tool: [M2F](https://github.com/optsuite/M2F.git)
 
 ## Repository Layout
 
-The repository now keeps a shared Lean source tree (`ReasBook/`) and also gives each book/paper directory
-its own independent Lean project files (`lakefile.lean`, `lean-toolchain`, `build.sh`, `ProjectSite/`):
+The repository keeps a shared Lean source tree (`ReasBook/`) and a single Verso website project (`ReasBookWeb/`):
 
 ```text
 ReasBook/
@@ -77,13 +76,6 @@ Examples:
 From the repository root:
 
 ```bash
-./build.sh
-```
-
-Build an independent book/paper project (example):
-
-```bash
-cd ReasBook/Books/Analysis2_Tao_2022
 ./build.sh
 ```
 
