@@ -11,28 +11,28 @@ ReasBook is generated using the tool: [M2F](https://github.com/optsuite/M2F.git)
 ### Books
 - [Terence Tao, *Analysis II*, 4th ed., Hindustan Book Agency / Springer, Singapore, 2022, ISBN 978-981-19-7284-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022)
   - Contributors: Chenyi Li, Min Cui, Qiming Dai, Shu Miao, Wanli Ma, Yi Yuan, Zichen Wang, Ziyu Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/analysis2_tao_2022/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022/Chapters) | [README](./ReasBook/Books/Analysis2_Tao_2022/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/Analysis2_Tao_2022/Chapters) | [README](./ReasBook/Books/Analysis2_Tao_2022/README.md)
 - [R. Tyrrell Rockafellar, *Convex Analysis*, Princeton University Press, Princeton, 1970, ISBN 0-691-08069-0.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970)
   - Contributors: Changyu Zou, Chenyi Li, Guangxuan Pan, Pengfei Hao, Qiming Dai, Shu Miao, Siyuan Shao, Suwan Wu, Wanli Ma, Weiran Shi, Xinyi Guo, Xuran Sun, Yifan Bai, Yijie Wang, Yunfei Zhang, Yunxi Duan, Yuhao Jiang, Zebo Liu, Zhiyan Wang, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/convexanalysis_rockafellar_1970/chapters/chap01/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Chapters) | [README](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/ConvexAnalysis_Rockafellar_1970/Chapters) | [README](./ReasBook/Books/ConvexAnalysis_Rockafellar_1970/README.md)
 - [Jiri Lebl, *Introduction to Real Analysis, Volume I*, version 6.2, May 23, 2025, (TBD: publisher/city), (TBD: ISBN).](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025)
   - Contributors: Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/books/introductiontorealanalysisvolumei_jirilebl_2025/chapters/chap00/section03/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap00/section03.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters) | [README](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap00/section03.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters) | [README](./ReasBook/Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/README.md)
 - [Michele Conforti, Gerard Cornuejols, Giacomo Zambelli, *Integer Programming*, Graduate Texts in Mathematics 271, Springer, 2014, ISBN 978-3-319-11007-3.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014)
   - Contributors: Binghe Huang, Chenglin Li, Chenrui Yang, Chenxi Liu, Congyuan Lei, Dongye Song, Fuzhi Wang, Haodong Zhang, Jiangnan Song, Jinmin Song, Junze Qiao, Junzhe Lai, Kaiwen He, Liming Han, Lurong Yang, Meng Zhou, Pengqi Lei, Renran Luo, Siyan Chen, Wangqi Liu, Wenxin Zeng, Wanli Ma, Wenxuan Wu, Xinru Zhu, Xu Han, Xutianshi Tao, Yichao Guo, Youyou Qin, Yuhan Zhang, Yushen Guo, Yutong Zhang, Ze Zhai, Zheng Ma, Zhiyong Chen, Zichen Wang, Zichen Xu, Zihao Liu.
-  - Links: Verso (TBD) | Documentation (TBD) | Lean source (TBD) | [README](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Books/IntegerProgramming_Conforti_2014/Book.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Books/IntegerProgramming_Conforti_2014) | [README](./ReasBook/Books/IntegerProgramming_Conforti_2014/README.md)
 
 ### Papers
 - [Yurii Nesterov, "Smooth minimization of non-smooth functions," *Mathematical Programming*, Ser. A 103, 127-152, 2005, DOI: 10.1007/s10107-004-0552-5.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004)
   - Contributors: Wanli Ma, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/smoothminimization_nesterov_2004/sections/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004/Sections) | [README](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/SmoothMinimization_Nesterov_2004/Sections) | [README](./ReasBook/Papers/SmoothMinimization_Nesterov_2004/README.md)
 - [Mohamad Maassarani, "On Some Local Rings," arXiv:2512.19197v1 [math.AC], 2025.](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/OnSomeLocalRings_Maassaran_2025)
   - Contributors: Liang Xiao, Haochen Ju, Zichen Wang.
-  - Links: [Verso](https://optsuite.github.io/ReasBook/papers/onsomelocalrings_maassaran_2025/sections/section01/) | [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Sections) | [README](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/README.md)
+  - Links: [Documentation](https://optsuite.github.io/ReasBook/docs/Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html) | [Lean source](https://github.com/optsuite/ReasBook/tree/main/ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/Sections) | [README](./ReasBook/Papers/OnSomeLocalRings_Maassaran_2025/README.md)
 
 ## Repository Layout
 
-The repository is organized into a Lean source tree and a web-documentation tree:
+The repository keeps a shared Lean source tree (`ReasBook/`) and a single Verso website project (`ReasBookWeb/`):
 
 ```text
 ReasBook/
@@ -145,7 +145,7 @@ If generated artifacts were previously committed, untrack them (without deleting
 - Ziyu Wang, Bowen Yang, Chenyi Li, Yuan Zhang, Shihao Zhou, Bin Dong, Zaiwen Wen. *Translating Informal Proofs into Formal Proofs Using a Chain of States*. [(Paper)](https://arxiv.org/abs/2512.10317)
 - Chenyi Li, Wanli Ma, Zichen Wang, Zaiwen Wen. *SITA: A Framework for Structure-to-Instance Theorem Autoformalization*, AAAI 2026. [(Paper)](https://arxiv.org/abs/2511.10356)
 - Chenyi Li, Yanchen Nie, Zhenyu Ming, Gong Zhang, Kun Yuan, Zaiwen Wen. *OptProver: Bridging Olympiad and Optimization through Continual Training in Formal Theorem Proving*.
-- Zichen Wang, Wanli Ma, Zhenyu Ming, Gong Zhang, Kun Yuan, Zaiwen Wen. *M2F: Automated Formalization of Mathematical Literature at Scale*.
+- Zichen Wang, Wanli Ma, Zhenyu Ming, Gong Zhang, Kun Yuan, Zaiwen Wen. *M2F: Automated Formalization of Mathematical Literature at Scale*. [(Paper)](https://arxiv.org/abs/2602.17016)
 
 ### Premise Selection
 
@@ -154,7 +154,7 @@ If generated artifacts were previously committed, untrack them (without deleting
 
 ### Benchmark
 
-- Bowen Yang, Yi Yuan, Chenyi Li, Ziyu Wang, Liangqi Li, Bo Zhang, Zhe Li, Zaiwen Wen. *Construction-Verification: A Benchmark for Formalizing Applied Mathematics in Lean 4*.
+- Bowen Yang, Yi Yuan, Chenyi Li, Ziyu Wang, Liangqi Li, Bo Zhang, Zhe Li, Zaiwen Wen. *Construction-Verification: A Benchmark for Formalizing Applied Mathematics in Lean 4*. [(Paper)](https://arxiv.org/abs/2602.01291)
 
 ## Team
 

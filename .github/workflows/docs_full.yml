@@ -1,0 +1,47 @@
+name: Build Full Docs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan (Lean toolchain manager)
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+
+      - name: Restore shared Lake cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ReasBook/.lake
+          key: lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          restore-keys: |
+            lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Build shared ReasBook docs
+        run: |
+          set -euo pipefail
+          cd ReasBook
+          ~/.elan/bin/lake -R exe cache get || true
+          timeout --signal=TERM --kill-after=5m 150m ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-docs-shared
+          path: ReasBook/.lake/build/doc
+
+      - name: Save shared Lake cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ReasBook/.lake
+          key: lake-shared-docs-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}

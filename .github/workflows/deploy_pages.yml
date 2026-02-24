@@ -1,4 +1,4 @@
-name: Deploy Verso site to GitHub Pages
+name: Deploy Verso Site to GitHub Pages
 
 on:
   push:
@@ -11,141 +11,216 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  discover-projects:
     runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.collect.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect books/papers for site partitioning
+        id: collect
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+
+          root = Path("ReasBook")
+          projects = []
+
+          for kind_dir, kind_slug, kind_title, leaf in [
+              (root / "Books", "books", "Books", "Book"),
+              (root / "Papers", "papers", "Papers", "Paper"),
+          ]:
+              if not kind_dir.is_dir():
+                  continue
+              for project in sorted(kind_dir.iterdir()):
+                  if not project.is_dir():
+                      continue
+                  if not (project / f"{leaf}.lean").is_file():
+                      continue
+
+                  projects.append(
+                      {
+                          "kind": kind_slug,
+                          "kindTitle": kind_title,
+                          "name": project.name,
+                          "slug": project.name.lower(),
+                      }
+                  )
+
+          print(f"projects={json.dumps(projects, separators=(',', ':'))}")
+          PY
+
+  build-monolith-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
       - name: Install elan (Lean toolchain manager)
         run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
 
-      - name: Restore main project cache if available
+      - name: Restore shared Lake caches if available
         uses: actions/cache/restore@v4
         with:
           path: |
             ReasBook/.lake
-          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
+            ReasBookWeb/.lake
+          key: lake-shared-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}
           restore-keys: |
-            lake-main-${{ runner.os }}-${{ runner.arch }}-
+            lake-shared-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Restore ReasBookWeb project cache if available
-        uses: actions/cache/restore@v4
+      - name: Build monolithic Verso site
+        run: |
+          set -euo pipefail
+          ./build-web.sh
+
+      - name: Upload monolithic site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-monolith
+          path: ReasBookWeb/_site
+
+      - name: Save shared Lake caches
+        if: always()
+        uses: actions/cache/save@v4
         with:
           path: |
+            ReasBook/.lake
             ReasBookWeb/.lake
-          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-
+          key: lake-shared-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}
 
-      - name: Force clean site output only
-        run: |
-          rm -rf ReasBookWeb/_site
+  assemble-pages-artifact:
+    needs:
+      - discover-projects
+      - build-monolith-site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-      # Mathlib cache
-      - name: Get Mathlib cache (main project)
-        run: |
-          ~/.elan/bin/lake exe cache get || true
-        working-directory: ReasBook
+      - name: Download monolithic site artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: site-monolith
+          path: .artifacts/monolith
 
-      # Build main project API docs
-      - name: Build main project docs (doc-gen4)
+      - name: Assemble partitioned sites tree
+        env:
+          PROJECTS_JSON: ${{ needs.discover-projects.outputs.projects }}
         run: |
-          ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
-          for entry in Books/*/Book.lean Papers/*/Paper.lean; do
-            [ -f "$entry" ] || continue
-            mod="${entry%.lean}"
-            mod="${mod//\//.}"
-            ~/.elan/bin/lake -R -Kenv=dev build "$mod:docs"
-          done
-        working-directory: ReasBook
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
 
-      - name: Build main project
-        run: |
-          ~/.elan/bin/lake build
-        working-directory: ReasBook
+          projects = json.loads("""${PROJECTS_JSON}""")
+          src_root = Path(".artifacts/monolith")
+          dst_root = Path(".site")
 
-      # Generate Sections/Routes before building the site
-      - name: Generate sections/routes
-        run: |
-          python3 scripts/gen_sections.py
-        working-directory: ReasBookWeb
+          if dst_root.exists():
+              shutil.rmtree(dst_root)
+          shutil.copytree(src_root, dst_root)
 
-      - name: Build Verso site
-        run: |
-          ~/.elan/bin/lake exe reasbook-site
-        working-directory: ReasBookWeb
+          sites_root = dst_root / "sites"
+          sites_root.mkdir(parents=True, exist_ok=True)
 
-      # Copy main project docs into site as /docs
-      - name: Copy main docs into site as /docs
-        run: |
-          mkdir -p ReasBookWeb/_site/docs
-          cp -r ReasBook/.lake/build/doc/. ReasBookWeb/_site/docs/
-          find ReasBookWeb/_site/docs -name "*.trace" -delete || true
-          find ReasBookWeb/_site/docs -name "*.hash" -delete || true
-          if [ ! -f ReasBookWeb/_site/docs/index.html ]; then
-            {
-              echo '<!doctype html>'
-              echo '<html lang="en">'
-              echo '<head>'
-              echo '  <meta charset="utf-8" />'
-              echo '  <meta name="viewport" content="width=device-width, initial-scale=1" />'
-              echo '  <title>ReasBook Documentation</title>'
-              echo '</head>'
-              echo '<body>'
-              echo '  <h1>ReasBook Documentation</h1>'
-              echo '  <ul>'
-              echo '    <li><a href="./Books/Analysis2_Tao_2022/Chapters/Chap01/section01.html">Analysis II (Tao): Chapter 1 Section 1</a></li>'
-              echo '    <li><a href="./Books/ConvexAnalysis_Rockafellar_1970/Chapters/Chap01/section01_part1.html">Convex Analysis (Rockafellar): Chapter 1 Section 1 Part 1</a></li>'
-              echo '    <li><a href="./Books/IntroductiontoRealAnalysisVolumeI_JiriLebl_2025/Chapters/Chap01/section01.html">Introduction to Real Analysis I (Lebl): Chapter 1 Section 1</a></li>'
-              echo '    <li><a href="./Papers/SmoothMinimization_Nesterov_2004/Sections/section01.html">Nesterov 2004: Section 1</a></li>'
-              echo '    <li><a href="./Papers/OnSomeLocalRings_Maassaran_2025/Sections/section01.html">Maassarani 2025: Section 1</a></li>'
-              echo '  </ul>'
-              echo '</body>'
-              echo '</html>'
-            } > ReasBookWeb/_site/docs/index.html
-          fi
+          for p in projects:
+              slug = p["slug"]
+              kind = p["kind"]
+              kind_title = p["kindTitle"]
+              name = p["name"]
+
+              pages_src = dst_root / kind / slug
+              docs_src = dst_root / "docs" / kind_title / name
+              site_dir = sites_root / slug
+
+              if site_dir.exists():
+                  shutil.rmtree(site_dir)
+              site_dir.mkdir(parents=True, exist_ok=True)
+
+              if pages_src.is_dir():
+                  shutil.copytree(pages_src, site_dir / "pages")
+              if docs_src.is_dir():
+                  shutil.copytree(docs_src, site_dir / "docs")
+
+              index = site_dir / "index.html"
+              index.write_text(
+                  "\n".join(
+                      [
+                          "<!doctype html>",
+                          '<html lang="en">',
+                          "<head>",
+                          '  <meta charset="utf-8" />',
+                          '  <meta name="viewport" content="width=device-width,initial-scale=1" />',
+                          f"  <title>{name}</title>",
+                          "</head>",
+                          "<body>",
+                          f"  <h1>{name}</h1>",
+                          "  <ul>",
+                          '    <li><a href="./pages/">Pages</a></li>',
+                          '    <li><a href="./docs/">Documentation</a></li>',
+                          "  </ul>",
+                          '  <p><a href="/ReasBook/">Back to root</a></p>',
+                          "</body>",
+                          "</html>",
+                          "",
+                      ]
+                  ),
+                  encoding="utf-8",
+              )
+
+          root_index = dst_root / "index.html"
+          if not root_index.exists():
+              links = "\n".join(
+                  f'    <li><a href="./sites/{p["slug"]}/">{p["name"]}</a></li>' for p in projects
+              )
+              root_index.write_text(
+                  "\n".join(
+                      [
+                          "<!doctype html>",
+                          '<html lang="en">',
+                          "<head>",
+                          '  <meta charset="utf-8" />',
+                          '  <meta name="viewport" content="width=device-width,initial-scale=1" />',
+                          "  <title>ReasBook</title>",
+                          "</head>",
+                          "<body>",
+                          "  <h1>ReasBook</h1>",
+                          "  <h2>Independent Sites</h2>",
+                          "  <ul>",
+                          links,
+                          "  </ul>",
+                          "</body>",
+                          "</html>",
+                          "",
+                      ]
+                  ),
+                  encoding="utf-8",
+              )
+          PY
 
       - name: Verify generated site tree
         run: |
-          echo "Commit: $GITHUB_SHA"
-          echo "Top-level _site entries:"
-          ls -la ReasBookWeb/_site
-          echo "Top-level _site/docs entries:"
-          ls -la ReasBookWeb/_site/docs
-          echo "Check site root injection in generated HTML:"
-          grep -R --line-number "__versoSiteRoot" ReasBookWeb/_site | head -n 20
-          echo "Check <base href> in generated HTML:"
-          grep -R --line-number '<base href="/ReasBook/"/>' ReasBookWeb/_site | head -n 20
-          echo "Check for known bad duplicated path pattern:"
-          ! grep -R --line-number 'chap01/books/' ReasBookWeb/_site
-          test -f ReasBookWeb/_site/index.html
-          test -f ReasBookWeb/_site/docs/index.html
-
-      - name: Save main project cache
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ReasBook/.lake
-          key: lake-main-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
-
-      - name: Save ReasBookWeb project cache
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ReasBookWeb/.lake
-          key: lake-ReasBookWeb-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBookWeb/lean-toolchain') }}-${{ hashFiles('ReasBookWeb/lake-manifest.json') }}-${{ github.sha }}
+          set -euo pipefail
+          ls -la .site
+          test -d .site/books
+          test -d .site/papers
+          test -d .site/docs
+          test -d .site/sites
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ReasBookWeb/_site
+          path: .site
 
   deploy:
-    needs: build
+    needs: assemble-pages-artifact
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -154,6 +229,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
       - name: Print deployed Pages URL
         run: |
           echo "GitHub Pages URL: ${{ steps.deployment.outputs.page_url }}"
