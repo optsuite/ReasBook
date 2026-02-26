@@ -58,7 +58,9 @@ jobs:
 
   build-monolith-site:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 240
+    env:
+      HEARTBEAT_INTERVAL_SECONDS: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -75,10 +77,23 @@ jobs:
           restore-keys: |
             lake-shared-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Build monolithic Verso site
+      - name: Build Lean project and docs
+        timeout-minutes: 150
         run: |
           set -euo pipefail
-          ./build-web.sh
+          ./scripts/ci_heartbeat.sh "build.sh (Lean + doc-gen)" ./build.sh
+
+      - name: Build ReasBookWeb (sections + Verso)
+        timeout-minutes: 70
+        run: |
+          set -euo pipefail
+          ./scripts/ci_heartbeat.sh "build_reasbook_web.sh (Verso)" ./scripts/build_reasbook_web.sh
+
+      - name: Assemble docs under ReasBookWeb/_site/docs
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          ./scripts/ci_heartbeat.sh "assemble_site_docs.sh" ./scripts/assemble_site_docs.sh
 
       - name: Upload monolithic site artifact
         uses: actions/upload-artifact@v4
