@@ -104,6 +104,30 @@ lemma theorem18_6_not_mem_C0_of_extreme_not_mem_closure_exposedPoints {n : ℕ} 
       (S₁ := (∅ : Set (Fin n → ℝ))) (x := x) hxext'
   exact hxnot hxmem
 
+/-- Given a compact convex set `C`, a closed convex subset `D`, and a point `x ∈ C \ D`, there is
+a nonempty exposed face of `C` disjoint from `D`. -/
+lemma theorem18_6_exists_exposedFace_disjoint_closedConvex {n : ℕ}
+    {C D : Set (Fin n → ℝ)} (hCcompact : IsCompact C) (hDclosed : IsClosed D)
+    (hDconv : Convex ℝ D) {x : Fin n → ℝ} (hxC : x ∈ C) (hxnotD : x ∉ D) :
+    ∃ (l : (Fin n → ℝ) →L[ℝ] ℝ),
+      (l.toExposed C).Nonempty ∧ IsExposed ℝ C (l.toExposed C) ∧ (l.toExposed C) ⊆ C \ D := by
+  obtain ⟨l, r, hlD, hrx⟩ :=
+    geometric_hahn_banach_closed_point (s := D) hDconv hDclosed hxnotD
+  obtain ⟨z, hzC, hzmax⟩ := hCcompact.exists_isMaxOn ⟨x, hxC⟩ l.continuous.continuousOn
+  have hzExp : z ∈ l.toExposed C := by
+    refine ⟨hzC, ?_⟩
+    exact (isMaxOn_iff.1 hzmax)
+  refine ⟨l, ⟨z, hzExp⟩, ?_, ?_⟩
+  · simpa using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C))
+  · intro y hy
+    have hyC : y ∈ C := hy.1
+    have hxy : l x ≤ l y := hy.2 x hxC
+    have hrlty : r < l y := lt_of_lt_of_le hrx hxy
+    refine ⟨hyC, ?_⟩
+    intro hyD
+    have hlt : l y < r := hlD y hyD
+    exact (lt_irrefl _ (lt_trans hlt hrlty))
+
 /-- An extreme point outside the closure of exposed points yields a disjoint exposed face. -/
 lemma theorem18_6_exists_exposedFace_disjoint_C0 {n : ℕ} {C : Set (Fin n → ℝ)}
     (hCclosed : IsClosed C) (hCbounded : Bornology.IsBounded C) (hCconv : Convex ℝ C)
@@ -113,6 +137,7 @@ lemma theorem18_6_exists_exposedFace_disjoint_C0 {n : ℕ} {C : Set (Fin n → �
       (l.toExposed C).Nonempty ∧ IsExposed ℝ C (l.toExposed C) ∧
         (l.toExposed C) ⊆ C \ conv (closure (C.exposedPoints ℝ)) := by
   classical
+  have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
   have hC0closed : IsClosed (conv (closure (C.exposedPoints ℝ))) :=
     (theorem18_6_isClosed_conv_closure_exposedPoints (n := n) (C := C) hCclosed hCbounded
       hCconv).1
@@ -123,26 +148,10 @@ lemma theorem18_6_exists_exposedFace_disjoint_C0 {n : ℕ} {C : Set (Fin n → �
   have hC0conv : Convex ℝ (conv (closure (C.exposedPoints ℝ))) := by
     simpa [conv] using
       (convex_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)))
-  obtain ⟨l, r, hlC0, hrx⟩ :=
-    geometric_hahn_banach_closed_point (s := conv (closure (C.exposedPoints ℝ))) hC0conv hC0closed
+  exact
+    theorem18_6_exists_exposedFace_disjoint_closedConvex (n := n) (C := C)
+      (D := conv (closure (C.exposedPoints ℝ))) hCcompact hC0closed hC0conv (x := x) hxext.1
       hxnotC0
-  have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
-  obtain ⟨z, hzC, hzmax⟩ :=
-    hCcompact.exists_isMaxOn ⟨x, hxext.1⟩ l.continuous.continuousOn
-  have hzExp : z ∈ l.toExposed C := by
-    refine ⟨hzC, ?_⟩
-    exact (isMaxOn_iff.1 hzmax)
-  have hnonempty : (l.toExposed C).Nonempty := ⟨z, hzExp⟩
-  refine ⟨l, hnonempty, ?_, ?_⟩
-  · simpa using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C))
-  · intro y hy
-    have hyC : y ∈ C := hy.1
-    have hxy : l x ≤ l y := hy.2 x hxext.1
-    have hrlty : r < l y := lt_of_lt_of_le hrx hxy
-    refine ⟨hyC, ?_⟩
-    intro hyC0
-    have hlt : l y < r := hlC0 y hyC0
-    exact (lt_irrefl _ (lt_trans hlt hrlty))
 
 /-- A nonempty exposed subset is of the form `l.toExposed C`. -/
 lemma theorem18_6_exposed_eq_toExposed {n : ℕ} {C : Set (Fin n → ℝ)} {F : Set (Fin n → ℝ)}
@@ -187,337 +196,804 @@ lemma theorem18_6_singleton_of_finrank_vectorSpan_eq_zero {n : ℕ} {F : Set (Fi
   intro q hq
   exact hsub hq hp
 
-/-- A nonzero restriction of a linear functional has full range. -/
-lemma theorem18_6_restrict_range_eq_top_of_exists_ne_zero {V : Type*} [AddCommGroup V]
-    [Module ℝ V] {K : Submodule ℝ V} {φ : V →ₗ[ℝ] ℝ}
-    (h : ∃ v, v ∈ K ∧ φ v ≠ 0) :
-    LinearMap.range (φ.domRestrict K) = ⊤ := by
-  rcases h with ⟨v, hvK, hvne⟩
-  apply LinearMap.range_eq_top.mpr
-  intro r
-  refine ⟨(r / φ v) • (⟨v, hvK⟩ : K), ?_⟩
-  have hvne' : φ v ≠ 0 := hvne
-  calc
-    (φ.domRestrict K) ((r / φ v) • (⟨v, hvK⟩ : K)) =
-        (r / φ v) * φ v := by
-          simp [LinearMap.domRestrict_apply, map_smul, smul_eq_mul]
-    _ = r := by field_simp [hvne']
+/-- Relative to a fixed maximizer `z`, membership in `l.toExposed C` is equivalent to equality of
+functional values. -/
+lemma theorem18_6_mem_toExposed_iff_eq_of_mem {n : ℕ} {C : Set (Fin n → ℝ)}
+    {l : (Fin n → ℝ) →L[ℝ] ℝ} {z x : Fin n → ℝ} (hz : z ∈ l.toExposed C) (hxC : x ∈ C) :
+    x ∈ l.toExposed C ↔ l x = l z := by
+  constructor
+  · intro hx
+    exact le_antisymm (hz.2 x hx.1) (hx.2 z hz.1)
+  · intro hEq
+    refine ⟨hxC, ?_⟩
+    intro y hyC
+    have hyz : l y ≤ l z := hz.2 y hyC
+    simpa [hEq] using hyz
 
-/-- Compactness-gap data for a proper exposed face. -/
-axiom theorem18_6_toExposed_gap_data {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) (hCne : C.Nonempty) (l g : (Fin n → ℝ) →L[ℝ] ℝ)
-    (hCF : l.toExposed C ≠ C) :
-    ∃ z ∈ l.toExposed C, ∃ y0 ∈ C \ l.toExposed C,
-      (∀ y ∈ C, l y ≤ l z) ∧ (∀ y ∈ C \ l.toExposed C, l y ≤ l y0) ∧ l y0 < l z ∧
-        ∃ B ≥ 0, ∀ x ∈ C, |g x| ≤ B
+/-- Relative to a fixed maximizer `z`, non-membership in `l.toExposed C` is equivalent to strict
+functional decrease. -/
+lemma theorem18_6_not_mem_toExposed_iff_lt_of_mem {n : ℕ} {C : Set (Fin n → ℝ)}
+    {l : (Fin n → ℝ) →L[ℝ] ℝ} {z x : Fin n → ℝ} (hz : z ∈ l.toExposed C) (hxC : x ∈ C) :
+    x ∉ l.toExposed C ↔ l x < l z := by
+  constructor
+  · intro hxnot
+    have hxle : l x ≤ l z := hz.2 x hxC
+    have hne : l x ≠ l z := by
+      intro hEq
+      exact hxnot ((theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z)
+        (x := x) hz hxC).2 hEq)
+    exact lt_of_le_of_ne hxle hne
+  · intro hlt hx
+    have hEq :
+        l x = l z :=
+      (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z)
+        (x := x) hz hxC).1 hx
+    have : l z < l z := by linarith [hlt, hEq]
+    exact (lt_irrefl _ this)
 
-/-- Tie-break lemma: refine an exposed face by a second functional. -/
-lemma theorem18_6_combine_functionals_toExposed_eq {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) (hCne : C.Nonempty)
-    (l g : (Fin n → ℝ) →L[ℝ] ℝ) :
-    ∃ ε : ℝ, 0 < ε ∧ (l + ε • g).toExposed C = g.toExposed (l.toExposed C) := by
-  classical
-  by_cases hCF : l.toExposed C = C
-  · refine ⟨1, by norm_num, ?_⟩
-    -- When `l` is constant on `C`, maximizers of `l + g` coincide with maximizers of `g`.
-    have hlconst : ∀ x y, x ∈ C → y ∈ C → l x = l y := by
-      intro x y hx hy
-      have hx' : x ∈ l.toExposed C := by simpa [hCF] using hx
-      have hy' : y ∈ l.toExposed C := by simpa [hCF] using hy
-      apply le_antisymm
-      · exact hy'.2 x hx
-      · exact hx'.2 y hy
-    ext x; constructor
-    · intro hx
-      refine ⟨by simpa [hCF] using hx.1, ?_⟩
-      intro y hy
-      have hyC : y ∈ C := by simpa [hCF] using hy
-      have hxy : l y + g y ≤ l x + g x := by
-        simpa using (hx.2 y hyC)
-      have hlyx : l y = l x := hlconst y x hyC hx.1
-      have hxy' : g y ≤ g x := by
-        have hxy'' : l y + g y ≤ l y + g x := by
-          simpa [hlyx] using hxy
-        exact (add_le_add_iff_left (l y)).1 hxy''
-      exact hxy'
-    · intro hx
-      refine ⟨(hx.1).1, ?_⟩
-      intro y hy
-      have hyF : y ∈ l.toExposed C := by simpa [hCF] using hy
-      have hxy : g y ≤ g x := hx.2 y hyF
-      have hlyx : l y = l x := hlconst y x hy (hx.1).1
-      have hxy' : l y + g y ≤ l y + g x := by
-        simpa [add_comm, add_left_comm, add_assoc] using (add_le_add_left hxy (l y))
-      simpa [hlyx] using hxy'
-  ·
-    -- Nontrivial case: pick ε by a compactness-gap argument.
-    set F : Set (Fin n → ℝ) := l.toExposed C
-    set G : Set (Fin n → ℝ) := g.toExposed F
-    obtain ⟨z, hzF, y0, hy0CF, hzmax, hy0max, hlt, B, hBnonneg, hBbound⟩ :=
-      theorem18_6_toExposed_gap_data (n := n) (C := C) hCcompact hCne l g hCF
-    let M : ℝ := l z
-    let m : ℝ := l y0
-    have hM : ∀ y ∈ C, l y ≤ M := by
-      simpa [M] using hzmax
-    have hm : ∀ y ∈ C \ F, l y ≤ m := by
-      simpa [m, F] using hy0max
-    have hlt' : m < M := by
-      simpa [m, M] using hlt
-    let δ : ℝ := M - m
+/-- Any nonempty `toExposed` set is a level set in `C` at its maximizing value. -/
+lemma theorem18_6_toExposed_eq_levelset_of_mem {n : ℕ} {C : Set (Fin n → ℝ)}
+    {l : (Fin n → ℝ) →L[ℝ] ℝ} {z : Fin n → ℝ} (hz : z ∈ l.toExposed C) :
+    l.toExposed C = {x ∈ C | l x = l z} := by
+  ext x
+  constructor
+  · intro hx
+    exact ⟨hx.1, (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z)
+      (x := x) hz hx.1).1 hx⟩
+  · intro hx
+    exact (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z)
+      (x := x) hz hx.1).2 hx.2
+
+/-- Uniform-gap perturbation: if `l` has a positive gap away from `l.toExposed C` and `g` is
+bounded on `C`, then for small positive `ε`, every maximizer of `l + ε g` lies in `l.toExposed C`.
+-/
+lemma theorem18_6_toExposed_subset_of_small_perturbation_of_uniform_gap {n : ℕ}
+    {C : Set (Fin n → ℝ)} {l g : (Fin n → ℝ) →L[ℝ] ℝ} {z : Fin n → ℝ}
+    (hz : z ∈ l.toExposed C) (hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B)
+    (hgap : ∃ δ : ℝ, 0 < δ ∧ ∀ y ∈ C \ l.toExposed C, l y ≤ l z - δ) :
+    ∃ ε : ℝ, 0 < ε ∧ (l + ε • g).toExposed C ⊆ l.toExposed C := by
+  rcases hB with ⟨B, hBnonneg, hBbound⟩
+  rcases hgap with ⟨δ, hδpos, hgap'⟩
+  let ε : ℝ := δ / (4 * (B + 1))
+  have hεpos : 0 < ε := by
+    have hdenpos : 0 < 4 * (B + 1) := by nlinarith [hBnonneg]
+    exact div_pos hδpos hdenpos
+  have hεnonneg : 0 ≤ ε := le_of_lt hεpos
+  have hεB_le : ε * B ≤ δ / 4 := by
+    have hB_le : B ≤ B + 1 := by linarith
+    have h1 : ε * B ≤ ε * (B + 1) := mul_le_mul_of_nonneg_left hB_le hεnonneg
+    have hB1ne : (B + 1) ≠ 0 := by linarith [hBnonneg]
+    have hεB1 : ε * (B + 1) = δ / 4 := by
+      dsimp [ε]
+      field_simp [hB1ne]
+    simpa [hεB1] using h1
+  refine ⟨ε, hεpos, ?_⟩
+  intro x hx
+  by_contra hxnot
+  have hxC : x ∈ C := hx.1
+  have hxCF : x ∈ C \ l.toExposed C := ⟨hxC, hxnot⟩
+  have hxl : l x ≤ l z - δ := hgap' x hxCF
+  have hxgbound : |g x| ≤ B := hBbound x hxC
+  have hxg_le : g x ≤ B := (abs_le.mp hxgbound).2
+  have hxval : (l + ε • g) x ≤ l z - δ + ε * B := by
+    have hmul : ε * g x ≤ ε * B := mul_le_mul_of_nonneg_left hxg_le hεnonneg
+    have hsum : l x + ε * g x ≤ (l z - δ) + ε * B := add_le_add hxl hmul
+    simpa using hsum
+  have hzgbound : |g z| ≤ B := hBbound z hz.1
+  have hzg_ge : -B ≤ g z := (abs_le.mp hzgbound).1
+  have hmulz : -(ε * B) ≤ ε * g z := by
+    have hmul := mul_le_mul_of_nonneg_left hzg_ge hεnonneg
+    simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
+  have hzval : l z - ε * B ≤ (l + ε • g) z := by
+    have hsum : l z - ε * B ≤ l z + ε * g z := by
+      have hsum' := add_le_add_left hmulz (l z)
+      simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
+    simpa using hsum
+  have hxmax : (l + ε • g) z ≤ (l + ε • g) x := hx.2 z hz.1
+  have hδhalf : δ / 2 ≤ δ - 2 * (ε * B) := by
+    linarith [hεB_le]
+  have hstrict_aux : l z - δ + ε * B < l z - ε * B := by
+    have : 0 < δ - 2 * (ε * B) := by
+      have hδhalf' : 0 < δ / 2 := by nlinarith [hδpos]
+      exact lt_of_lt_of_le hδhalf' hδhalf
+    linarith
+  have hchain : l z - ε * B ≤ l z - δ + ε * B := by
+    exact le_trans hzval (le_trans hxmax hxval)
+  exact (not_le_of_gt hstrict_aux) hchain
+
+/-- On any closed subset of `C` disjoint from `l.toExposed C`, the exposing functional is
+uniformly below its maximal value by a positive gap. -/
+lemma theorem18_6_exists_uniform_gap_on_closed_disjoint_subset {n : ℕ}
+    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C) {l : (Fin n → ℝ) →L[ℝ] ℝ}
+    {z : Fin n → ℝ} (hz : z ∈ l.toExposed C) {K : Set (Fin n → ℝ)} (hKclosed : IsClosed K)
+    (hKsub : K ⊆ C) (hKdisj : Disjoint K (l.toExposed C)) :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ y ∈ K, l y ≤ l z - δ := by
+  by_cases hKne : K.Nonempty
+  · have hKcompact : IsCompact K := hCcompact.of_isClosed_subset hKclosed hKsub
+    let f : (Fin n → ℝ) → ℝ := fun y => l z - l y
+    obtain ⟨y0, hy0K, hy0min⟩ :=
+      hKcompact.exists_isMinOn hKne ((continuous_const.sub l.continuous).continuousOn)
+    have hKdisj' : ∀ ⦃x : Fin n → ℝ⦄, x ∈ K → x ∈ l.toExposed C → False :=
+      Set.disjoint_left.1 hKdisj
+    have hy0notF : y0 ∉ l.toExposed C := fun hy0F => hKdisj' hy0K hy0F
+    have hy0lt : l y0 < l z :=
+      (theorem18_6_not_mem_toExposed_iff_lt_of_mem (n := n) (C := C) (l := l) (z := z) (x := y0)
+        hz (hKsub hy0K)).1 hy0notF
+    let δ : ℝ := l z - l y0
     have hδpos : 0 < δ := by
       dsimp [δ]
-      linarith [hlt']
-    let ε : ℝ := δ / (4 * (B + 1))
-    have hεpos : 0 < ε := by
-      have hdenpos : 0 < 4 * (B + 1) := by nlinarith [hBnonneg]
-      exact div_pos hδpos hdenpos
-    have hεnonneg : 0 ≤ ε := le_of_lt hεpos
-    have hεB_le : ε * B ≤ δ / 4 := by
-      have hB_le : B ≤ B + 1 := by linarith
-      have h1 : ε * B ≤ ε * (B + 1) := mul_le_mul_of_nonneg_left hB_le hεnonneg
-      have hεB1 : ε * (B + 1) = δ / 4 := by
-        have hB1ne : (B + 1) ≠ 0 := by linarith [hBnonneg]
-        dsimp [ε]
-        field_simp [hB1ne]
-      simpa [hεB1] using h1
-    have hgap : m + ε * B < M - ε * B := by
-      have h1 : m + ε * B ≤ m + δ / 4 := by linarith [hεB_le]
-      have h2 : M - δ / 4 ≤ M - ε * B := by linarith [hεB_le]
-      have hstrict : m + δ / 4 < M - δ / 4 := by
-        have hMdef : M = m + δ := by
-          dsimp [δ]
-          linarith
-        linarith [hδpos, hMdef]
-      exact lt_of_le_of_lt h1 (lt_of_lt_of_le hstrict h2)
-    have hlconst : ∀ x y, x ∈ F → y ∈ F → l x = l y := by
-      intro x y hx hy
-      apply le_antisymm
-      · exact hy.2 x hx.1
-      · exact hx.2 y hy.1
-    have hsubset : (l + ε • g).toExposed C ⊆ F := by
-      intro x hx
-      by_contra hxF
-      have hxCF : x ∈ C \ F := ⟨hx.1, hxF⟩
-      have hxle : l x ≤ m := hm x hxCF
-      have hxgbound : |g x| ≤ B := hBbound x hx.1
-      have hgle : g x ≤ B := (abs_le.mp hxgbound).2
-      have hxval : (l + ε • g) x ≤ m + ε * B := by
-        have hmul : ε * g x ≤ ε * B := mul_le_mul_of_nonneg_left hgle hεnonneg
-        have hsum : l x + ε * g x ≤ m + ε * B := add_le_add hxle hmul
+      linarith [hy0lt]
+    refine ⟨δ, hδpos, ?_⟩
+    intro y hyK
+    have hymin : f y0 ≤ f y := (isMinOn_iff.mp hy0min) y hyK
+    have hyy0 : l y ≤ l y0 := by
+      dsimp [f] at hymin
+      linarith
+    calc
+      l y ≤ l y0 := hyy0
+      _ = l z - δ := by simp [δ]
+  · have hKempty : K = ∅ := Set.not_nonempty_iff_eq_empty.mp hKne
+    refine ⟨1, by norm_num, ?_⟩
+    intro y hyK
+    exfalso
+    simp [hKempty] at hyK
+
+/-- Compact lexicographic perturbation (singleton target): if `z` is the unique `g`-maximizer on
+`l.toExposed C` and `l` has a uniform positive gap away from `l.toExposed C`, then for a small
+positive perturbation `l + ε g`, the exposed set on `C` is exactly `{z}`. -/
+lemma theorem18_6_compact_lexicographic_perturbation_singleton {n : ℕ}
+    {C : Set (Fin n → ℝ)} {l g : (Fin n → ℝ) →L[ℝ] ℝ} {z : Fin n → ℝ}
+    (hz : z ∈ l.toExposed C) (huniq : g.toExposed (l.toExposed C) = ({z} : Set (Fin n → ℝ)))
+    (hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B)
+    (hgap : ∃ δ : ℝ, 0 < δ ∧ ∀ y ∈ C \ l.toExposed C, l y ≤ l z - δ) :
+    ∃ ε : ℝ, 0 < ε ∧ (l + ε • g).toExposed C = ({z} : Set (Fin n → ℝ)) := by
+  rcases hB with ⟨B, hBnonneg, hBbound⟩
+  rcases hgap with ⟨δ, hδpos, hgap'⟩
+  let ε : ℝ := δ / (4 * (B + 1))
+  have hεpos : 0 < ε := by
+    have hdenpos : 0 < 4 * (B + 1) := by nlinarith [hBnonneg]
+    exact div_pos hδpos hdenpos
+  have hεnonneg : 0 ≤ ε := le_of_lt hεpos
+  have hεB_le : ε * B ≤ δ / 4 := by
+    have hB_le : B ≤ B + 1 := by linarith
+    have h1 : ε * B ≤ ε * (B + 1) := mul_le_mul_of_nonneg_left hB_le hεnonneg
+    have hB1ne : (B + 1) ≠ 0 := by linarith [hBnonneg]
+    have hεB1 : ε * (B + 1) = δ / 4 := by
+      dsimp [ε]
+      field_simp [hB1ne]
+    simpa [hεB1] using h1
+  have hzG : z ∈ g.toExposed (l.toExposed C) := by
+    simp [huniq]
+  have hzPert : z ∈ (l + ε • g).toExposed C := by
+    refine ⟨hz.1, ?_⟩
+    intro y hyC
+    by_cases hyF : y ∈ l.toExposed C
+    · have hlyz :
+        l y = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := y) hz
+          hyC).1 hyF
+      have hyg : g y ≤ g z := hzG.2 y hyF
+      have hmul : ε * g y ≤ ε * g z := mul_le_mul_of_nonneg_left hyg hεnonneg
+      have hsum : l y + ε * g y ≤ l z + ε * g z := add_le_add (le_of_eq hlyz) hmul
+      simpa using hsum
+    · have hyCF : y ∈ C \ l.toExposed C := ⟨hyC, hyF⟩
+      have hyl : l y ≤ l z - δ := hgap' y hyCF
+      have hygbound : |g y| ≤ B := hBbound y hyC
+      have hyg_le : g y ≤ B := (abs_le.mp hygbound).2
+      have hyval : (l + ε • g) y ≤ l z - δ + ε * B := by
+        have hmul : ε * g y ≤ ε * B := mul_le_mul_of_nonneg_left hyg_le hεnonneg
+        have hsum : l y + ε * g y ≤ (l z - δ) + ε * B := add_le_add hyl hmul
         simpa using hsum
-      have hzgbound : |g z| ≤ B := hBbound z hzF.1
-      have hzge : -B ≤ g z := (abs_le.mp hzgbound).1
-      have hmul' : -(ε * B) ≤ ε * g z := by
-        have hmul := mul_le_mul_of_nonneg_left hzge hεnonneg
+      have hzgbound : |g z| ≤ B := hBbound z hz.1
+      have hzg_ge : -B ≤ g z := (abs_le.mp hzgbound).1
+      have hmulz : -(ε * B) ≤ ε * g z := by
+        have hmul := mul_le_mul_of_nonneg_left hzg_ge hεnonneg
         simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
-      have hzval : M - ε * B ≤ (l + ε • g) z := by
-        have hsum : M - ε * B ≤ M + ε * g z := by
-          have hsum' := add_le_add_left hmul' M
+      have hzval : l z - ε * B ≤ (l + ε • g) z := by
+        have hsum : l z - ε * B ≤ l z + ε * g z := by
+          have hsum' := add_le_add_left hmulz (l z)
           simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
-        have hzM : l z = M := by rfl
-        simpa [hzM, M] using hsum
-      have hxge : (l + ε • g) z ≤ (l + ε • g) x := hx.2 z hzF.1
-      have hcontr : M - ε * B ≤ m + ε * B := le_trans (le_trans hzval hxge) hxval
-      have hgt : M - ε * B > m + ε * B := by
-        simpa [gt_iff_lt] using hgap
-      exact (not_le_of_gt hgt) hcontr
-    refine ⟨ε, hεpos, ?_⟩
-    ext x; constructor
-    · intro hx
-      have hxF : x ∈ F := hsubset hx
-      refine ⟨hxF, ?_⟩
-      intro y hyF
-      have hyC : y ∈ C := hyF.1
-      have hxy : (l + ε • g) y ≤ (l + ε • g) x := hx.2 y hyC
-      have hlyx : l y = l x := hlconst y x hyF hxF
-      have hxy' : ε * g y ≤ ε * g x := by
-        have hxy'' : l y + ε * g y ≤ l y + ε * g x := by
-          simpa [hlyx] using hxy
-        exact (add_le_add_iff_left (l y)).1 hxy''
-      have hεne : ε ≠ 0 := ne_of_gt hεpos
-      have hinvnonneg : 0 ≤ ε⁻¹ := inv_nonneg.mpr hεnonneg
-      have h' : ε⁻¹ * (ε * g y) ≤ ε⁻¹ * (ε * g x) :=
-        mul_le_mul_of_nonneg_left hxy' hinvnonneg
-      have hgyx : g y ≤ g x := by
-        simpa [mul_assoc, hεne] using h'
-      exact hgyx
-    · intro hxG
-      have hxF : x ∈ F := hxG.1
-      have hxC : x ∈ C := hxF.1
-      refine ⟨hxC, ?_⟩
-      intro y hyC
-      by_cases hyF : y ∈ F
-      ·
-        have hgy : g y ≤ g x := hxG.2 y hyF
-        have hmul : ε * g y ≤ ε * g x := mul_le_mul_of_nonneg_left hgy hεnonneg
-        have hxy' : l y + ε * g y ≤ l y + ε * g x := by
-          simpa [add_comm, add_left_comm, add_assoc] using (add_le_add_left hmul (l y))
-        have hlyx : l y = l x := hlconst y x hyF hxF
-        have hxy : l y + ε * g y ≤ l x + ε * g x := by
-          simpa [hlyx] using hxy'
-        simpa using hxy
-      ·
-        have hyCF : y ∈ C \ F := ⟨hyC, hyF⟩
-        have hy_le : l y ≤ m := hm y hyCF
-        have hygbound : |g y| ≤ B := hBbound y hyC
-        have hyg_le : g y ≤ B := (abs_le.mp hygbound).2
-        have hyval : (l + ε • g) y ≤ m + ε * B := by
-          have hmul : ε * g y ≤ ε * B := mul_le_mul_of_nonneg_left hyg_le hεnonneg
-          have hsum : l y + ε * g y ≤ m + ε * B := add_le_add hy_le hmul
-          simpa using hsum
-        have hxgbound : |g x| ≤ B := hBbound x hxC
-        have hxg_ge : -B ≤ g x := (abs_le.mp hxgbound).1
-        have hmul' : -(ε * B) ≤ ε * g x := by
-          have hmul := mul_le_mul_of_nonneg_left hxg_ge hεnonneg
-          simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
-        have hlx : l x = M := by
-          have := hlconst x z hxF hzF
-          simpa [M] using this
-        have hxval : M - ε * B ≤ (l + ε • g) x := by
-          have hsum : M - ε * B ≤ M + ε * g x := by
-            have hsum' := add_le_add_left hmul' M
-            simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
-          simpa [hlx, M] using hsum
-        have hgap' : m + ε * B < (l + ε • g) x := lt_of_lt_of_le hgap hxval
-        have hylt : (l + ε • g) y < (l + ε • g) x :=
-          lt_of_le_of_lt hyval hgap'
-        exact le_of_lt hylt
+        simpa using hsum
+      have hδhalf : δ / 2 ≤ δ - 2 * (ε * B) := by
+        linarith [hεB_le]
+      have hstrict_aux : l z - δ + ε * B < l z - ε * B := by
+        have : 0 < δ - 2 * (ε * B) := by
+          have hδhalf' : 0 < δ / 2 := by nlinarith [hδpos]
+          exact lt_of_lt_of_le hδhalf' hδhalf
+        linarith
+      have hylt : (l + ε • g) y < (l + ε • g) z := by
+        exact lt_of_le_of_lt hyval (lt_of_lt_of_le hstrict_aux hzval)
+      exact le_of_lt hylt
+  have hsubset_singleton : (l + ε • g).toExposed C ⊆ ({z} : Set (Fin n → ℝ)) := by
+    intro x hx
+    have hxC : x ∈ C := hx.1
+    by_cases hxF : x ∈ l.toExposed C
+    · have hxle : (l + ε • g) x ≤ (l + ε • g) z := hzPert.2 x hxC
+      have hxge : (l + ε • g) z ≤ (l + ε • g) x := hx.2 z hz.1
+      have hlxz :
+          l x = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hz
+          hxC).1 hxF
+      have hzgx_mul : ε * g z ≤ ε * g x := by
+        have hxge' : l z + ε * g z ≤ l z + ε * g x := by
+          simpa [hlxz] using hxge
+        linarith
+      have hzgx : g z ≤ g x := by
+        nlinarith [hzgx_mul, hεpos]
+      have hxgz : g x ≤ g z := hzG.2 x hxF
+      have hxG : x ∈ g.toExposed (l.toExposed C) := by
+        refine ⟨hxF, ?_⟩
+        intro w hwF
+        have hwgz : g w ≤ g z := hzG.2 w hwF
+        have hEqG : g x = g z := le_antisymm hxgz hzgx
+        simpa [hEqG] using hwgz
+      simpa [huniq] using hxG
+    · exfalso
+      have hxCF : x ∈ C \ l.toExposed C := ⟨hxC, hxF⟩
+      have hxl : l x ≤ l z - δ := hgap' x hxCF
+      have hxgbound : |g x| ≤ B := hBbound x hxC
+      have hxg_le : g x ≤ B := (abs_le.mp hxgbound).2
+      have hxval : (l + ε • g) x ≤ l z - δ + ε * B := by
+        have hmul : ε * g x ≤ ε * B := mul_le_mul_of_nonneg_left hxg_le hεnonneg
+        have hsum : l x + ε * g x ≤ (l z - δ) + ε * B := add_le_add hxl hmul
+        simpa using hsum
+      have hzgbound : |g z| ≤ B := hBbound z hz.1
+      have hzg_ge : -B ≤ g z := (abs_le.mp hzgbound).1
+      have hmulz : -(ε * B) ≤ ε * g z := by
+        have hmul := mul_le_mul_of_nonneg_left hzg_ge hεnonneg
+        simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
+      have hzval : l z - ε * B ≤ (l + ε • g) z := by
+        have hsum : l z - ε * B ≤ l z + ε * g z := by
+          have hsum' := add_le_add_left hmulz (l z)
+          simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
+        simpa using hsum
+      have hδhalf : δ / 2 ≤ δ - 2 * (ε * B) := by
+        linarith [hεB_le]
+      have hstrict_aux : l z - δ + ε * B < l z - ε * B := by
+        have : 0 < δ - 2 * (ε * B) := by
+          have hδhalf' : 0 < δ / 2 := by nlinarith [hδpos]
+          exact lt_of_lt_of_le hδhalf' hδhalf
+        linarith
+      have hchain : l z - ε * B ≤ l z - δ + ε * B := by
+        exact le_trans hzval (le_trans (hx.2 z hz.1) hxval)
+      exact (not_le_of_gt hstrict_aux) hchain
+  refine ⟨ε, hεpos, Set.Subset.antisymm hsubset_singleton ?_⟩
+  intro x hx
+  rcases Set.mem_singleton_iff.1 hx with rfl
+  exact hzPert
 
-/-- Refinement step: from a non-singleton exposed face, produce a smaller exposed face. -/
-lemma theorem18_6_refine_toExposed_dimDrop {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) {l : (Fin n → ℝ) →L[ℝ] ℝ}
-    (hFne : (l.toExposed C).Nonempty) (hFnot : ¬ ∃ p : Fin n → ℝ, l.toExposed C = {p}) :
-    ∃ g : (Fin n → ℝ) →L[ℝ] ℝ, ∃ ε : ℝ, 0 < ε ∧
-      ((l + ε • g).toExposed C).Nonempty ∧
-      (l + ε • g).toExposed C ⊂ l.toExposed C ∧
-      _root_.Module.finrank ℝ (vectorSpan ℝ ((l + ε • g).toExposed C)) <
-        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
-  classical
-  -- Pick two distinct points in the exposed face.
-  have hnot_sub : ¬ (l.toExposed C).Subsingleton := by
-    intro hsub
-    rcases hFne with ⟨p, hp⟩
-    have hsingle : l.toExposed C = {p} :=
-      Set.eq_singleton_iff_unique_mem.2 ⟨hp, fun q hq => hsub hq hp⟩
-    exact hFnot ⟨p, hsingle⟩
-  obtain ⟨x, hx, y, hy, hxy⟩ :=
-    (Set.not_subsingleton_iff).1 hnot_sub
-  obtain ⟨g, hgxy⟩ := geometric_hahn_banach_point_point (x := x) (y := y) hxy
-  -- Define the refined face inside the exposed face.
-  let F : Set (Fin n → ℝ) := l.toExposed C
-  let G : Set (Fin n → ℝ) := g.toExposed F
-  have hFcompact : IsCompact F :=
-    (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C)).isCompact hCcompact
-  have hGne : G.Nonempty := by
-    obtain ⟨z, hzF, hzmax⟩ := hFcompact.exists_isMaxOn hFne g.continuous.continuousOn
-    refine ⟨z, ⟨hzF, ?_⟩⟩
-    exact (isMaxOn_iff.1 hzmax)
-  have hGsub : G ⊆ F := fun z hz => hz.1
-  have hxnotG : x ∉ G := by
-    intro hxG
-    have hle : g y ≤ g x := hxG.2 y hy
-    have hgt : g y > g x := by
-      simpa [gt_iff_lt] using hgxy
-    exact (not_le_of_gt hgt) hle
-  have hGssub : G ⊂ F := by
-    refine ⟨hGsub, ?_⟩
-    intro hsubset
-    exact hxnotG (hsubset hx)
-  have hCne : C.Nonempty := hFne.mono
-    (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C)).subset
-  obtain ⟨ε, hεpos, hEq⟩ :=
-    theorem18_6_combine_functionals_toExposed_eq (n := n) (C := C) hCcompact hCne l g
-  refine ⟨g, ε, hεpos, ?_, ?_, ?_⟩
-  · simpa [hEq] using hGne
-  · simpa [hEq] using hGssub
-  ·
-    -- Strict finrank drop via a witness in `vectorSpan F` not in `vectorSpan G`.
-    have hGle : vectorSpan ℝ G ≤ vectorSpan ℝ F :=
-      vectorSpan_mono (k := ℝ) hGsub
-    have hGker : vectorSpan ℝ G ≤ LinearMap.ker g.toLinearMap :=
-      theorem18_6_vectorSpan_toExposed_le_ker (n := n) (A := F) g
-    have hvF : y -ᵥ x ∈ vectorSpan ℝ F :=
-      vsub_mem_vectorSpan (k := ℝ) hy hx
-    have hvnot : y -ᵥ x ∉ vectorSpan ℝ G := by
-      intro hvG
-      have hvker : g.toLinearMap (y -ᵥ x) = 0 := by
-        have hvker' : y -ᵥ x ∈ LinearMap.ker g.toLinearMap := hGker hvG
-        simpa using hvker'
-      have hgv : g.toLinearMap (y -ᵥ x) = g y - g x := by
-        change g (y -ᵥ x) = g y - g x
-        simp [vsub_eq_sub, g.map_sub]
-      have hgvne : g.toLinearMap (y -ᵥ x) ≠ 0 := by
-        have : g y - g x ≠ 0 := by linarith [hgxy]
-        simpa [hgv] using this
-      exact hgvne hvker
-    have hne : vectorSpan ℝ G ≠ vectorSpan ℝ F := by
-      intro hEqGF
-      have hvG : y -ᵥ x ∈ vectorSpan ℝ G := by simpa [hEqGF] using hvF
-      exact hvnot hvG
-    have hlt : vectorSpan ℝ G < vectorSpan ℝ F := lt_of_le_of_ne hGle hne
-    have hfin : _root_.Module.finrank ℝ (vectorSpan ℝ G) < _root_.Module.finrank ℝ (vectorSpan ℝ F) :=
-      Submodule.finrank_lt_finrank_of_lt hlt
-    have hfin' : _root_.Module.finrank ℝ (vectorSpan ℝ G) <
-        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
-      simpa [F] using hfin
-    -- Rewrite the goal's exposed face using `hEq`, then close with `hfin'`.
-    rw [hEq]
-    exact hfin'
+/-- Quantitative lexicographic perturbation:
+with a uniform gap away from `l.toExposed C` and a bound on `g` over `C`, a small perturbation
+realizes exactly `g.toExposed (l.toExposed C)`. -/
+lemma theorem18_6_compact_lexicographic_perturbation_toExposed_eq {n : ℕ}
+    {C : Set (Fin n → ℝ)} {l g : (Fin n → ℝ) →L[ℝ] ℝ} {z : Fin n → ℝ}
+    (hz : z ∈ l.toExposed C) (hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B)
+    (hgap : ∃ δ : ℝ, 0 < δ ∧ ∀ y ∈ C \ l.toExposed C, l y ≤ l z - δ) :
+    ∃ ε : ℝ, 0 < ε ∧ (l + ε • g).toExposed C = g.toExposed (l.toExposed C) := by
+  rcases hB with ⟨B, hBnonneg, hBbound⟩
+  rcases hgap with ⟨δ, hδpos, hgap'⟩
+  let ε : ℝ := δ / (4 * (B + 1))
+  have hεpos : 0 < ε := by
+    have hdenpos : 0 < 4 * (B + 1) := by nlinarith [hBnonneg]
+    exact div_pos hδpos hdenpos
+  have hεnonneg : 0 ≤ ε := le_of_lt hεpos
+  have hεB_le : ε * B ≤ δ / 4 := by
+    have hB_le : B ≤ B + 1 := by linarith
+    have h1 : ε * B ≤ ε * (B + 1) := mul_le_mul_of_nonneg_left hB_le hεnonneg
+    have hB1ne : (B + 1) ≠ 0 := by linarith [hBnonneg]
+    have hεB1 : ε * (B + 1) = δ / 4 := by
+      dsimp [ε]
+      field_simp [hB1ne]
+    simpa [hεB1] using h1
+  have hsubsetF : (l + ε • g).toExposed C ⊆ l.toExposed C := by
+    intro x hx
+    by_contra hxF
+    have hxC : x ∈ C := hx.1
+    have hxCF : x ∈ C \ l.toExposed C := ⟨hxC, hxF⟩
+    have hxl : l x ≤ l z - δ := hgap' x hxCF
+    have hxgbound : |g x| ≤ B := hBbound x hxC
+    have hxg_le : g x ≤ B := (abs_le.mp hxgbound).2
+    have hxval : (l + ε • g) x ≤ l z - δ + ε * B := by
+      have hmul : ε * g x ≤ ε * B := mul_le_mul_of_nonneg_left hxg_le hεnonneg
+      have hsum : l x + ε * g x ≤ (l z - δ) + ε * B := add_le_add hxl hmul
+      simpa using hsum
+    have hzgbound : |g z| ≤ B := hBbound z hz.1
+    have hzg_ge : -B ≤ g z := (abs_le.mp hzgbound).1
+    have hmulz : -(ε * B) ≤ ε * g z := by
+      have hmul := mul_le_mul_of_nonneg_left hzg_ge hεnonneg
+      simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
+    have hzval : l z - ε * B ≤ (l + ε • g) z := by
+      have hsum : l z - ε * B ≤ l z + ε * g z := by
+        have hsum' := add_le_add_left hmulz (l z)
+        simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
+      simpa using hsum
+    have hxmax : (l + ε • g) z ≤ (l + ε • g) x := hx.2 z hz.1
+    have hδhalf : δ / 2 ≤ δ - 2 * (ε * B) := by
+      linarith [hεB_le]
+    have hstrict_aux : l z - δ + ε * B < l z - ε * B := by
+      have : 0 < δ - 2 * (ε * B) := by
+        have hδhalf' : 0 < δ / 2 := by nlinarith [hδpos]
+        exact lt_of_lt_of_le hδhalf' hδhalf
+      linarith
+    have hchain : l z - ε * B ≤ l z - δ + ε * B := by
+      exact le_trans hzval (le_trans hxmax hxval)
+    exact (not_le_of_gt hstrict_aux) hchain
+  refine ⟨ε, hεpos, Set.Subset.antisymm ?_ ?_⟩
+  · intro x hx
+    have hxF : x ∈ l.toExposed C := hsubsetF hx
+    refine ⟨hxF, ?_⟩
+    intro y hyF
+    have hyC : y ∈ C := hyF.1
+    have hxy : (l + ε • g) y ≤ (l + ε • g) x := hx.2 y hyC
+    have hlyz : l y = l z :=
+      (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := y) hz
+        hyC).1 hyF
+    have hlxz : l x = l z :=
+      (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hz
+        hxF.1).1 hxF
+    have hlyx : l y = l x := by linarith
+    have hxy' : l y + ε * g y ≤ l y + ε * g x := by
+      simpa [hlyx] using hxy
+    have hmul : ε * g y ≤ ε * g x := (add_le_add_iff_left (l y)).1 hxy'
+    have hgyx : g y ≤ g x := by
+      nlinarith [hmul, hεpos]
+    exact hgyx
+  · intro x hxG
+    have hxF : x ∈ l.toExposed C := hxG.1
+    have hxC : x ∈ C := hxF.1
+    refine ⟨hxC, ?_⟩
+    intro y hyC
+    by_cases hyF : y ∈ l.toExposed C
+    · have hgy : g y ≤ g x := hxG.2 y hyF
+      have hmul : ε * g y ≤ ε * g x := mul_le_mul_of_nonneg_left hgy hεnonneg
+      have hxy' : l y + ε * g y ≤ l y + ε * g x := by
+        simpa [add_comm, add_left_comm, add_assoc] using (add_le_add_left hmul (l y))
+      have hlyz : l y = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := y) hz
+          hyC).1 hyF
+      have hlxz : l x = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hz
+          hxC).1 hxF
+      have hlyx : l y = l x := by linarith
+      have hxy : l y + ε * g y ≤ l x + ε * g x := by
+        simpa [hlyx] using hxy'
+      simpa using hxy
+    · have hyCF : y ∈ C \ l.toExposed C := ⟨hyC, hyF⟩
+      have hyl : l y ≤ l z - δ := hgap' y hyCF
+      have hygbound : |g y| ≤ B := hBbound y hyC
+      have hyg_le : g y ≤ B := (abs_le.mp hygbound).2
+      have hyval : (l + ε • g) y ≤ l z - δ + ε * B := by
+        have hmul : ε * g y ≤ ε * B := mul_le_mul_of_nonneg_left hyg_le hεnonneg
+        have hsum : l y + ε * g y ≤ (l z - δ) + ε * B := add_le_add hyl hmul
+        simpa using hsum
+      have hxgbound : |g x| ≤ B := hBbound x hxC
+      have hxg_ge : -B ≤ g x := (abs_le.mp hxgbound).1
+      have hmulx : -(ε * B) ≤ ε * g x := by
+        have hmul := mul_le_mul_of_nonneg_left hxg_ge hεnonneg
+        simpa [mul_neg, neg_mul, mul_comm, mul_left_comm, mul_assoc] using hmul
+      have hlxz : l x = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hz
+          hxC).1 hxF
+      have hxval : l z - ε * B ≤ (l + ε • g) x := by
+        have hsum : l z - ε * B ≤ l z + ε * g x := by
+          have hsum' := add_le_add_left hmulx (l z)
+          simpa [sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsum'
+        simpa [hlxz] using hsum
+      have hδhalf : δ / 2 ≤ δ - 2 * (ε * B) := by
+        linarith [hεB_le]
+      have hstrict_aux : l z - δ + ε * B < l z - ε * B := by
+        have : 0 < δ - 2 * (ε * B) := by
+          have hδhalf' : 0 < δ / 2 := by nlinarith [hδpos]
+          exact lt_of_lt_of_le hδhalf' hδhalf
+        linarith
+      have hgapx : l z - δ + ε * B < (l + ε • g) x := lt_of_lt_of_le hstrict_aux hxval
+      have hylt : (l + ε • g) y < (l + ε • g) x := lt_of_le_of_lt hyval hgapx
+      exact le_of_lt hylt
 
-/-- Induction on `finrank (vectorSpan)` for exposed faces of the form `l.toExposed C`. -/
-lemma theorem18_6_exposedFace_contains_exposedPoint_fin_toExposed {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) :
-    ∀ l : (Fin n → ℝ) →L[ℝ] ℝ, (l.toExposed C).Nonempty →
-      ∃ p ∈ l.toExposed C, p ∈ C.exposedPoints ℝ := by
-  classical
-  intro l hFne
-  refine
-    (measure (fun l : (Fin n → ℝ) →L[ℝ] ℝ =>
-      _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)))).wf.induction
-        (C := fun l => (l.toExposed C).Nonempty →
-          ∃ p ∈ l.toExposed C, p ∈ C.exposedPoints ℝ) l ?_ hFne
-  intro l ih hFne
-  by_cases hdim : _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) = 0
-  ·
-    rcases
-        theorem18_6_singleton_of_finrank_vectorSpan_eq_zero (n := n) (F := l.toExposed C) hFne
-          hdim with ⟨p, hp⟩
-    refine ⟨p, ?_, ?_⟩
-    · simp [hp]
-    ·
-      have hExp : IsExposed ℝ C ({p} : Set (Fin n → ℝ)) := by
-        simpa [hp] using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C))
-      exact theorem18_6_exposedPoint_of_exposed_singleton (n := n) (C := C) (p := p) hExp
-  ·
-    have hnot_singleton : ¬ ∃ p : Fin n → ℝ, l.toExposed C = {p} := by
-      intro hsingle
-      rcases hsingle with ⟨p, hp⟩
-      have hsub : (l.toExposed C).Subsingleton := by
-        simp [hp]
-      have hbot : vectorSpan ℝ (l.toExposed C) = ⊥ :=
-        (vectorSpan_eq_bot_iff_subsingleton (k := ℝ) (s := l.toExposed C)).2 hsub
-      have hfin0 : _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) = 0 :=
-        (Submodule.finrank_eq_zero).2 hbot
-      exact hdim hfin0
-    obtain ⟨g, ε, hεpos, hF'ne, hF'sub, hdimlt⟩ :=
-      theorem18_6_refine_toExposed_dimDrop (n := n) (C := C) hCcompact (l := l) hFne
-        hnot_singleton
-    have hres :=
-      ih (l + ε • g) hdimlt hF'ne
-    rcases hres with ⟨p, hpF', hpExp⟩
-    refine ⟨p, hF'sub.1 hpF', hpExp⟩
-
-/-- A nonempty exposed subset of a compact convex set contains an exposed point. -/
-lemma theorem18_6_exposedFace_contains_exposedPoint_fin {n : ℕ} {C : Set (Fin n → ℝ)}
+/-- A nonempty exposed face of a compact set contains an extreme point of the ambient set. -/
+lemma theorem18_6_exposedFace_contains_extremePoint_fin {n : ℕ} {C : Set (Fin n → ℝ)}
     (hCcompact : IsCompact C) {F : Set (Fin n → ℝ)}
     (hFexposed : IsExposed ℝ C F) (hFne : F.Nonempty) :
-    ∃ p ∈ F, p ∈ C.exposedPoints ℝ := by
-  classical
-  obtain ⟨l, rfl⟩ :=
-    theorem18_6_exposed_eq_toExposed (n := n) (C := C) (F := F) hFexposed hFne
+    ∃ p ∈ F, p ∈ C.extremePoints ℝ := by
+  have hFcompact : IsCompact F := hFexposed.isCompact hCcompact
+  rcases hFcompact.extremePoints_nonempty hFne with ⟨p, hpFext⟩
+  refine ⟨p, hpFext.1, ?_⟩
+  exact hFexposed.isExtreme.extremePoints_subset_extremePoints hpFext
+
+/-- Bridge-to-ambient step: once the compact lexicographic singleton data is available on an
+exposed face `l.toExposed C`, the selected point is an exposed point of `C`. -/
+lemma theorem18_6_exposedPoint_of_compact_lexicographic_bridge {n : ℕ}
+    {C : Set (Fin n → ℝ)} {l g : (Fin n → ℝ) →L[ℝ] ℝ} {z : Fin n → ℝ}
+    (hz : z ∈ l.toExposed C) (huniq : g.toExposed (l.toExposed C) = ({z} : Set (Fin n → ℝ)))
+    (hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B)
+    (hgap : ∃ δ : ℝ, 0 < δ ∧ ∀ y ∈ C \ l.toExposed C, l y ≤ l z - δ) :
+    z ∈ C.exposedPoints ℝ := by
+  rcases
+      theorem18_6_compact_lexicographic_perturbation_singleton
+        (C := C) (l := l) (g := g) (z := z) hz huniq hB hgap with
+    ⟨ε, _hεpos, hEq⟩
+  have hExpPert : IsExposed ℝ C ((l + ε • g).toExposed C) := by
+    simpa using (ContinuousLinearMap.toExposed.isExposed (l := l + ε • g) (A := C))
+  have hExpSingleton : IsExposed ℝ C ({z} : Set (Fin n → ℝ)) := by
+    simpa [hEq] using hExpPert
   exact
-    theorem18_6_exposedFace_contains_exposedPoint_fin_toExposed (n := n) (C := C) hCcompact
-      l hFne
+    theorem18_6_exposedPoint_of_exposed_singleton (n := n) (C := C) (p := z)
+      hExpSingleton
+
+/-- Perturbation-limit bridge:
+if exposed points `p k` are selected from perturbed maximizer sets `(l + εₖ g).toExposed C`,
+converge to `z`, and the perturbation terms vanish in the limit, then `z` lies in the exposed face
+`l.toExposed C` and in `closure (C.exposedPoints ℝ)`. -/
+lemma theorem18_6_bridge_of_perturbation_limit {n : ℕ}
+    {C : Set (Fin n → ℝ)} {l g : (Fin n → ℝ) →L[ℝ] ℝ}
+    {ε : ℕ → ℝ} {p : ℕ → (Fin n → ℝ)} {z : Fin n → ℝ}
+    (hzC : z ∈ C) (hpExp : ∀ k, p k ∈ C.exposedPoints ℝ)
+    (hpPert : ∀ k, p k ∈ (l + ε k • g).toExposed C)
+    (hpTend : Filter.Tendsto p Filter.atTop (nhds z))
+    (hεgP : Filter.Tendsto (fun k => ε k * g (p k)) Filter.atTop (nhds 0))
+    (hεgConst : ∀ y ∈ C, Filter.Tendsto (fun k => ε k * g y) Filter.atTop (nhds 0)) :
+    ∃ q ∈ l.toExposed C, q ∈ closure (C.exposedPoints ℝ) := by
+  have hzFace : z ∈ l.toExposed C := by
+    refine ⟨hzC, ?_⟩
+    intro y hyC
+    have hLeft :
+        Filter.Tendsto (fun k => l y + ε k * g y) Filter.atTop (nhds (l y + 0)) :=
+      tendsto_const_nhds.add (hεgConst y hyC)
+    have hRight :
+        Filter.Tendsto (fun k => l (p k) + ε k * g (p k)) Filter.atTop (nhds (l z + 0)) := by
+      have hlpk : Filter.Tendsto (fun k => l (p k)) Filter.atTop (nhds (l z)) :=
+        (l.continuous.continuousAt.tendsto).comp hpTend
+      exact hlpk.add hεgP
+    have hEventually :
+        ∀ᶠ k in Filter.atTop, l y + ε k * g y ≤ l (p k) + ε k * g (p k) := by
+      refine Filter.Eventually.of_forall ?_
+      intro k
+      have hk := (hpPert k).2 y hyC
+      simpa [smul_eq_mul, add_comm, add_left_comm, add_assoc] using hk
+    have hle :
+        l y + 0 ≤ l z + 0 :=
+      tendsto_le_of_eventuallyLE hLeft hRight hEventually
+    simpa using hle
+  have hzcl : z ∈ closure (C.exposedPoints ℝ) :=
+    mem_closure_of_tendsto hpTend (Filter.Eventually.of_forall hpExp)
+  exact ⟨z, hzFace, hzcl⟩
+
+/-- Compact extraction for perturbed exposed selectors. -/
+lemma theorem18_6_compact_extract_subseq_exposed_perturbed {n : ℕ}
+    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C)
+    {l g : (Fin n → ℝ) →L[ℝ] ℝ} {ε : ℕ → ℝ} {p : ℕ → (Fin n → ℝ)}
+    (hpExp : ∀ k, p k ∈ C.exposedPoints ℝ)
+    (hpPert : ∀ k, p k ∈ (l + ε k • g).toExposed C) :
+    ∃ z : Fin n → ℝ, z ∈ C ∧
+      ∃ φ : ℕ → ℕ, StrictMono φ ∧
+        Filter.Tendsto (fun k => p (φ k)) Filter.atTop (nhds z) ∧
+        (∀ k, p (φ k) ∈ C.exposedPoints ℝ) ∧
+        (∀ k, p (φ k) ∈ (l + ε (φ k) • g).toExposed C) := by
+  have hpC : ∀ k, p k ∈ C := fun k => (hpPert k).1
+  rcases hCcompact.tendsto_subseq (x := p) hpC with ⟨z, hzC, φ, hφmono, hφtend⟩
+  refine ⟨z, hzC, φ, hφmono, hφtend, ?_, ?_⟩
+  · intro k
+    exact hpExp (φ k)
+  · intro k
+    simpa using hpPert (φ k)
+
+/-- Vanishing perturbation terms from a vanishing scale and bounded functional values on `C`. -/
+lemma theorem18_6_perturbation_terms_tendsto_zero {n : ℕ} {C : Set (Fin n → ℝ)}
+    {g : (Fin n → ℝ) →L[ℝ] ℝ} {ε : ℕ → ℝ} {p : ℕ → (Fin n → ℝ)}
+    (hε : Filter.Tendsto ε Filter.atTop (nhds 0))
+    (hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B) (hpC : ∀ k, p k ∈ C) :
+    Filter.Tendsto (fun k => ε k * g (p k)) Filter.atTop (nhds 0) ∧
+      (∀ y ∈ C, Filter.Tendsto (fun k => ε k * g y) Filter.atTop (nhds 0)) := by
+  rcases hB with ⟨B, _hBnonneg, hBbound⟩
+  have hfgBound : ∀ᶠ k in Filter.atTop, |g (p k)| ≤ B := by
+    refine Filter.Eventually.of_forall ?_
+    intro k
+    exact hBbound (p k) (hpC k)
+  have hmul0 :
+      Filter.Tendsto (fun k => g (p k) * ε k) Filter.atTop (nhds 0) :=
+    bdd_le_mul_tendsto_zero' B hfgBound hε
+  have hmain :
+      Filter.Tendsto (fun k => ε k * g (p k)) Filter.atTop (nhds 0) := by
+    simpa [mul_comm, mul_left_comm, mul_assoc] using hmul0
+  refine ⟨hmain, ?_⟩
+  intro y hyC
+  have hmul :
+      Filter.Tendsto (fun k => g y * ε k) Filter.atTop (nhds 0) :=
+    by simpa [mul_zero] using (hε.const_mul (g y))
+  simpa [mul_comm, mul_left_comm, mul_assoc] using hmul
+
+/-- A continuous linear functional is uniformly bounded in absolute value on a compact set. -/
+lemma theorem18_6_exists_abs_bound_on_compact {n : ℕ} {C : Set (Fin n → ℝ)}
+    (hCcompact : IsCompact C) (g : (Fin n → ℝ) →L[ℝ] ℝ) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B := by
+  by_cases hCne : C.Nonempty
+  · rcases
+      hCcompact.exists_isMaxOn hCne ((g.continuous.abs).continuousOn) with
+        ⟨x0, hx0C, hx0Max⟩
+    refine ⟨|g x0|, abs_nonneg _, ?_⟩
+    intro x hxC
+    exact (isMaxOn_iff.mp hx0Max) x hxC
+  · have hCempty : C = ∅ := Set.not_nonempty_iff_eq_empty.mp hCne
+    refine ⟨0, le_rfl, ?_⟩
+    intro x hxC
+    exfalso
+    simp [hCempty] at hxC
+
+/-- Choice form: nonempty intersections of exposed points with perturbed exposed faces give a
+selector sequence. -/
+lemma theorem18_6_choose_selector_of_nonempty_intersections {n : ℕ} {C : Set (Fin n → ℝ)}
+    {l g : (Fin n → ℝ) →L[ℝ] ℝ}
+    (hNonempty :
+      ∀ k : ℕ,
+        (C.exposedPoints ℝ ∩ (l + (1 / ((k : ℝ) + 1)) • g).toExposed C).Nonempty) :
+    ∃ p : ℕ → (Fin n → ℝ),
+      (∀ k : ℕ, p k ∈ C.exposedPoints ℝ) ∧
+        (∀ k : ℕ, p k ∈ (l + (1 / ((k : ℝ) + 1)) • g).toExposed C) := by
+  classical
+  choose p hp using hNonempty
+  refine ⟨p, ?_, ?_⟩
+  · intro k
+    exact (hp k).1
+  · intro k
+    exact (hp k).2
+
+/-- Core bridge target: a nonempty exposed face of a compact convex set meets ambient exposed
+points. -/
+lemma theorem18_6_exists_refined_toExposed_dimDrop {n : ℕ} {C : Set (Fin n → ℝ)}
+    (hCcompact : IsCompact C) (hCconv : Convex ℝ C) {l : (Fin n → ℝ) →L[ℝ] ℝ}
+    (hFne : (l.toExposed C).Nonempty) (hFnot : ¬ ∃ p : Fin n → ℝ, l.toExposed C = {p}) :
+    ∃ l' : (Fin n → ℝ) →L[ℝ] ℝ,
+      (l'.toExposed C).Nonempty ∧
+      (l'.toExposed C) ⊂ (l.toExposed C) ∧
+      _root_.Module.finrank ℝ (vectorSpan ℝ (l'.toExposed C)) <
+        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
+  classical
+  let F : Set (Fin n → ℝ) := l.toExposed C
+  have hnot_sub : ¬ F.Subsingleton := by
+    intro hsub
+    rcases hFne with ⟨p, hp⟩
+    have hsingle : F = {p} := Set.eq_singleton_iff_unique_mem.2 ⟨hp, fun q hq => hsub hq hp⟩
+    exact hFnot ⟨p, by simpa [F] using hsingle⟩
+  obtain ⟨x, hxF, y, hyF, hxy⟩ := (Set.not_subsingleton_iff).1 hnot_sub
+  obtain ⟨g, hgxy⟩ := geometric_hahn_banach_point_point (x := x) (y := y) hxy
+  let G : Set (Fin n → ℝ) := g.toExposed F
+  have hFcompact : IsCompact F := by
+    simpa [F] using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C)).isCompact hCcompact
+  obtain ⟨z, hzF, hzmax⟩ := hFcompact.exists_isMaxOn hFne g.continuous.continuousOn
+  have hzG : z ∈ G := by
+    refine ⟨hzF, ?_⟩
+    exact (isMaxOn_iff.mp hzmax)
+  have hGne : G.Nonempty := ⟨z, hzG⟩
+  have hGsub : G ⊆ F := fun w hw => hw.1
+  have hxnotG : x ∉ G := by
+    intro hxG
+    have hle : g y ≤ g x := hxG.2 y hyF
+    exact (not_le_of_gt hgxy) hle
+  have hGssub : G ⊂ F := by
+    refine ⟨hGsub, ?_⟩
+    intro hEq
+    exact hxnotG (hEq hxF)
+  let T2 : (Fin n → ℝ) →L[ℝ] (Fin 2 → ℝ) :=
+    ContinuousLinearMap.pi (fun i : Fin 2 => if i = 0 then l else g)
+  let S : Set (Fin 2 → ℝ) := T2 '' C
+  let p2 : Fin 2 → ℝ := T2 z
+  have hExpose : ∃ L : (Fin 2 → ℝ) →L[ℝ] ℝ, L.toExposed S = ({p2} : Set (Fin 2 → ℝ)) := by
+    -- Core 2D bridge still missing: expose the lexicographic top point in the compact image.
+    sorry
+  rcases hExpose with ⟨L, hLsingleton⟩
+  let l' : (Fin n → ℝ) →L[ℝ] ℝ := L.comp T2
+  have hmem_l' :
+      ∀ x : Fin n → ℝ, x ∈ l'.toExposed C ↔ x ∈ C ∧ T2 x ∈ L.toExposed S := by
+    intro x
+    constructor
+    · intro hx
+      refine ⟨hx.1, ?_⟩
+      refine ⟨⟨x, hx.1, rfl⟩, ?_⟩
+      intro u huS
+      rcases huS with ⟨y, hyC, rfl⟩
+      simpa [l', S] using hx.2 y hyC
+    · intro hx
+      refine ⟨hx.1, ?_⟩
+      intro y hyC
+      have hyS : T2 y ∈ S := ⟨y, hyC, rfl⟩
+      have hmax : ∀ v ∈ S, L v ≤ L (T2 x) := (hx.2).2
+      have : L (T2 y) ≤ L (T2 x) := hmax (T2 y) hyS
+      simpa [l', S] using this
+  have hmem_l'_eq :
+      ∀ x : Fin n → ℝ, x ∈ l'.toExposed C ↔ x ∈ C ∧ T2 x = p2 := by
+    intro x
+    constructor
+    · intro hx
+      rcases (hmem_l' x).1 hx with ⟨hxC, hxL⟩
+      have hxSing : T2 x ∈ ({p2} : Set (Fin 2 → ℝ)) := by simpa [hLsingleton] using hxL
+      exact ⟨hxC, Set.mem_singleton_iff.mp hxSing⟩
+    · intro hx
+      refine (hmem_l' x).2 ?_
+      refine ⟨hx.1, ?_⟩
+      simp [hLsingleton, hx.2]
+  have hEq : l'.toExposed C = G := by
+    ext x
+    constructor
+    · intro hx
+      rcases (hmem_l'_eq x).1 hx with ⟨hxC, hxT⟩
+      have hlx : l x = l z := by
+        have h0 := congrArg (fun w : Fin 2 → ℝ => w 0) hxT
+        simpa [T2, p2] using h0
+      have hxF' : x ∈ F := by
+        exact
+          (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hzF
+            hxC).2 hlx
+      have hgx : g x = g z := by
+        have h1 := congrArg (fun w : Fin 2 → ℝ => w 1) hxT
+        simpa [T2, p2] using h1
+      exact
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := F) (l := g) (z := z) (x := x) hzG
+          hxF').2 hgx
+    · intro hxG
+      have hxF' : x ∈ F := hxG.1
+      have hxC : x ∈ C := hxF'.1
+      have hlx : l x = l z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hzF
+          hxC).1 hxF'
+      have hgx : g x = g z :=
+        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := F) (l := g) (z := z) (x := x) hzG
+          hxF').1 hxG
+      have hxT : T2 x = p2 := by
+        ext i
+        fin_cases i
+        · simp [T2, p2, hlx]
+        · simp [T2, p2, hgx]
+      exact (hmem_l'_eq x).2 ⟨hxC, hxT⟩
+  have hl'ne : (l'.toExposed C).Nonempty := by
+    simpa [hEq] using hGne
+  have hl'ssub : (l'.toExposed C) ⊂ (l.toExposed C) := by
+    simpa [hEq, F, G] using hGssub
+  have hGle : vectorSpan ℝ G ≤ vectorSpan ℝ F := vectorSpan_mono (k := ℝ) hGsub
+  have hGker : vectorSpan ℝ G ≤ LinearMap.ker g.toLinearMap :=
+    theorem18_6_vectorSpan_toExposed_le_ker (n := n) (A := F) g
+  have hvF : y -ᵥ x ∈ vectorSpan ℝ F := vsub_mem_vectorSpan (k := ℝ) hyF hxF
+  have hvnot : y -ᵥ x ∉ vectorSpan ℝ G := by
+    intro hvG
+    have hvker : g.toLinearMap (y -ᵥ x) = 0 := by
+      have hvker' : y -ᵥ x ∈ LinearMap.ker g.toLinearMap := hGker hvG
+      simpa using hvker'
+    have hgv : g.toLinearMap (y -ᵥ x) = g y - g x := by
+      change g (y -ᵥ x) = g y - g x
+      simp [vsub_eq_sub, g.map_sub]
+    have hgvne : g.toLinearMap (y -ᵥ x) ≠ 0 := by
+      have : g y - g x ≠ 0 := by linarith [hgxy]
+      simpa [hgv] using this
+    exact hgvne hvker
+  have hne : vectorSpan ℝ G ≠ vectorSpan ℝ F := by
+    intro hEqGF
+    have hvG : y -ᵥ x ∈ vectorSpan ℝ G := by simpa [hEqGF] using hvF
+    exact hvnot hvG
+  have hlt : vectorSpan ℝ G < vectorSpan ℝ F := lt_of_le_of_ne hGle hne
+  have hfin : _root_.Module.finrank ℝ (vectorSpan ℝ G) < _root_.Module.finrank ℝ (vectorSpan ℝ F) :=
+    Submodule.finrank_lt_finrank_of_lt hlt
+  have hfin' :
+      _root_.Module.finrank ℝ (vectorSpan ℝ (l'.toExposed C)) <
+        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
+    rw [hEq]
+    simpa [F, G] using hfin
+  exact ⟨l', hl'ne, hl'ssub, hfin'⟩
+
+/-- Core bridge target: a nonempty exposed face of a compact convex set meets ambient exposed
+points. -/
+lemma theorem18_6_exposedFace_inter_exposedPoints_nonempty {n : ℕ}
+    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C) (hCconv : Convex ℝ C)
+    {l : (Fin n → ℝ) →L[ℝ] ℝ} (hFne : (l.toExposed C).Nonempty) :
+    (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty := by
+  classical
+  let μ : ((Fin n → ℝ) →L[ℝ] ℝ) → ℕ := fun l =>
+    _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C))
+  have hmain :
+      ∀ l : (Fin n → ℝ) →L[ℝ] ℝ, (l.toExposed C).Nonempty →
+        (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty := by
+    intro l
+    show (l.toExposed C).Nonempty → (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty
+    refine
+      (measure μ).wf.induction
+        (C := fun l : (Fin n → ℝ) →L[ℝ] ℝ =>
+          (l.toExposed C).Nonempty → (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty)
+        l ?_
+    intro l ih hFne
+    by_cases hdim : μ l = 0
+    ·
+      rcases
+          theorem18_6_singleton_of_finrank_vectorSpan_eq_zero (n := n) (F := l.toExposed C) hFne
+            hdim with ⟨p, hp⟩
+      have hExp : IsExposed ℝ C ({p} : Set (Fin n → ℝ)) := by
+        simpa [hp] using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C))
+      have hpExp : p ∈ C.exposedPoints ℝ :=
+        theorem18_6_exposedPoint_of_exposed_singleton (n := n) (C := C) (p := p) hExp
+      have hpF : p ∈ l.toExposed C := by simp [hp]
+      exact ⟨p, hpExp, hpF⟩
+    ·
+      have hFnot : ¬ ∃ p : Fin n → ℝ, l.toExposed C = ({p} : Set (Fin n → ℝ)) := by
+        intro hsingle
+        rcases hsingle with ⟨p, hp⟩
+        have hsub : (l.toExposed C).Subsingleton := by simp [hp]
+        have hbot : vectorSpan ℝ (l.toExposed C) = ⊥ :=
+          (vectorSpan_eq_bot_iff_subsingleton (k := ℝ) (s := l.toExposed C)).2 hsub
+        have hfin0 : _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) = 0 :=
+          (Submodule.finrank_eq_zero).2 hbot
+        exact hdim hfin0
+      rcases
+          theorem18_6_exists_refined_toExposed_dimDrop (n := n) (C := C) hCcompact hCconv
+            (l := l) hFne hFnot with
+        ⟨l', hF'ne, hF'ssub, hdimlt⟩
+      have hrec : (C.exposedPoints ℝ ∩ l'.toExposed C).Nonempty := ih l' hdimlt hF'ne
+      rcases hrec with ⟨p, hpExp, hpF'⟩
+      exact ⟨p, hpExp, hF'ssub.1 hpF'⟩
+  exact hmain l hFne
+
+/-- Straszewicz perturbation core (existence form): for a nonempty exposed face `l.toExposed C`,
+there exists a perturbation direction whose discrete perturbations keep meeting ambient exposed
+points. -/
+lemma theorem18_6_exists_perturbation_with_nonempty_exposed_intersections {n : ℕ}
+    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C) (hCconv : Convex ℝ C)
+    {l : (Fin n → ℝ) →L[ℝ] ℝ} (hFne : (l.toExposed C).Nonempty) :
+    ∃ g : (Fin n → ℝ) →L[ℝ] ℝ,
+      ∀ k : ℕ,
+        (C.exposedPoints ℝ ∩ (l + (1 / ((k : ℝ) + 1)) • g).toExposed C).Nonempty := by
+  have hBase : (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty :=
+    theorem18_6_exposedFace_inter_exposedPoints_nonempty (n := n) (C := C) hCcompact hCconv
+      (l := l) hFne
+  refine ⟨0, ?_⟩
+  intro k
+  simpa [smul_zero, add_zero] using hBase
+
+/-- Straszewicz bridge core (existence form):
+any nonempty exposed face of a compact convex set contains a point in the closure of ambient
+exposed points. -/
+lemma theorem18_6_exposedFace_contains_closureExposedPoint_fin {n : ℕ} {C : Set (Fin n → ℝ)}
+    (hCcompact : IsCompact C) (hCconv : Convex ℝ C) {F : Set (Fin n → ℝ)}
+    (hFexposed : IsExposed ℝ C F) (hFne : F.Nonempty) :
+    ∃ p ∈ F, p ∈ closure (C.exposedPoints ℝ) := by
+  rcases theorem18_6_exposed_eq_toExposed (n := n) (C := C) (F := F) hFexposed hFne with ⟨l, rfl⟩
+  have hBridge :
+      ∃ p ∈ l.toExposed C, p ∈ closure (C.exposedPoints ℝ) := by
+    rcases
+        theorem18_6_exists_perturbation_with_nonempty_exposed_intersections (n := n) (C := C)
+          hCcompact hCconv (l := l) hFne with
+      ⟨g, hNonempty⟩
+    rcases
+        theorem18_6_choose_selector_of_nonempty_intersections (n := n) (C := C) (l := l)
+          (g := g) hNonempty with
+      ⟨p, hpExp, hpPert⟩
+    have hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B :=
+      theorem18_6_exists_abs_bound_on_compact (n := n) (C := C) hCcompact g
+    let ε : ℕ → ℝ := fun k => 1 / ((k : ℝ) + 1)
+    have hε : Filter.Tendsto ε Filter.atTop (nhds 0) := tendsto_one_div_add_atTop_nhds_zero_nat
+    have hpPert' : ∀ k, p k ∈ (l + ε k • g).toExposed C := by
+      intro k
+      simpa [ε] using hpPert k
+    rcases
+        theorem18_6_compact_extract_subseq_exposed_perturbed (n := n) (C := C) hCcompact
+          (l := l) (g := g) (ε := ε) (p := p) hpExp hpPert' with
+      ⟨z, hzC, φ, hφmono, hφtend, hpExpφ, hpPertφ⟩
+    have hεφ : Filter.Tendsto (fun k => ε (φ k)) Filter.atTop (nhds 0) :=
+      hε.comp hφmono.tendsto_atTop
+    have hTerms :=
+      theorem18_6_perturbation_terms_tendsto_zero (n := n) (C := C)
+        (g := g) (ε := fun k => ε (φ k)) (p := fun k => p (φ k)) hεφ hB
+        (fun k => (hpPertφ k).1)
+    have hSeq :
+        ∃ (g : (Fin n → ℝ) →L[ℝ] ℝ) (ε : ℕ → ℝ) (p : ℕ → (Fin n → ℝ)) (z : Fin n → ℝ),
+          z ∈ C ∧
+            (∀ k, p k ∈ C.exposedPoints ℝ) ∧
+            (∀ k, p k ∈ (l + ε k • g).toExposed C) ∧
+            Filter.Tendsto p Filter.atTop (nhds z) ∧
+            Filter.Tendsto (fun k => ε k * g (p k)) Filter.atTop (nhds 0) ∧
+            (∀ y ∈ C, Filter.Tendsto (fun k => ε k * g y) Filter.atTop (nhds 0)) :=
+      ⟨g, (fun k => ε (φ k)), (fun k => p (φ k)), z, hzC, hpExpφ, hpPertφ, hφtend,
+        hTerms.1, hTerms.2⟩
+    rcases hSeq with ⟨g, ε, p, z, hzC, hpExp, hpPert, hpTend, hεgP, hεgConst⟩
+    exact
+      theorem18_6_bridge_of_perturbation_limit (C := C) (l := l) (g := g) (ε := ε) (p := p)
+        (z := z) hzC hpExp hpPert hpTend hεgP hεgConst
+  exact hBridge
 
 /-- Theorem 18.6. Every extreme point lies in the closure of the exposed points (bounded case). -/
 theorem theorem18_6_extremePoints_subset_closure_exposedPoints {n : ℕ} (C : Set (Fin n → ℝ))
@@ -533,17 +1009,12 @@ theorem theorem18_6_extremePoints_subset_closure_exposedPoints {n : ℕ} (C : Se
       (x := x) hxext' hxnot
   have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
   rcases
-      theorem18_6_exposedFace_contains_exposedPoint_fin (n := n) (C := C) hCcompact
-        (F := l.toExposed C) hFexposed hFne with ⟨p, hpF, hpExp⟩
-  have hpC0 : p ∈ conv (closure (C.exposedPoints ℝ)) := by
-    have hpcl : p ∈ closure (C.exposedPoints ℝ) :=
-      subset_closure (s := C.exposedPoints ℝ) hpExp
+      theorem18_6_exposedFace_contains_closureExposedPoint_fin (n := n) (C := C) hCcompact hCconv
+        (F := l.toExposed C) hFexposed hFne with ⟨q, hqF, hqcl⟩
+  have hqC0 : q ∈ conv (closure (C.exposedPoints ℝ)) := by
     simpa [conv] using
-      (subset_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)) hpcl)
-  have hpnot : p ∉ conv (closure (C.exposedPoints ℝ)) := by
-    have hpC0' : p ∈ C \ conv (closure (C.exposedPoints ℝ)) := hFsub hpF
-    exact hpC0'.2
-  exact hpnot hpC0
+      (subset_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)) hqcl)
+  exact (hFsub hqF).2 hqC0
 
 /-- The RHS mixed convex hull is contained in the closed convex set. -/
 lemma theorem18_7_rhs_subset_C {n : ℕ} {C : Set (Fin n → ℝ)} (hCclosed : IsClosed C)
@@ -822,11 +1293,11 @@ lemma theorem18_8_bddAbove_image_dotProduct_of_isCompact {n : ℕ} {C : Set (Fin
   simpa using (IsCompact.bddAbove_image (α := ℝ) (β := Fin n → ℝ) (f := fun y =>
     dotProduct y xStar) hCcompact hcont)
 
-/-- For each `xStar`, there is an exposed maximizer of `y ↦ dotProduct y xStar`. -/
+/-- For each `xStar`, there is an extreme-point maximizer of `y ↦ dotProduct y xStar`. -/
 lemma theorem18_8_exists_exposedPoint_maximizer_dotProduct {n : ℕ} {C : Set (Fin n → ℝ)}
     (hCclosed : IsClosed C) (hCbounded : Bornology.IsBounded C) (hCne : C.Nonempty) :
     ∀ xStar : Fin n → ℝ,
-      ∃ p, p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.exposedPoints ℝ := by
+      ∃ p, p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.extremePoints ℝ := by
   intro xStar
   have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
   have hcont :
@@ -844,10 +1315,10 @@ lemma theorem18_8_exists_exposedPoint_maximizer_dotProduct {n : ℕ} {C : Set (F
     simpa using
       (ContinuousLinearMap.toExposed.isExposed (l := dotProductCLM (n := n) xStar) (A := C))
   rcases
-      theorem18_6_exposedFace_contains_exposedPoint_fin (n := n) (C := C) hCcompact
+      theorem18_6_exposedFace_contains_extremePoint_fin (n := n) (C := C) hCcompact
         (F := (dotProductCLM (n := n) xStar).toExposed C) hFexp hFne with
-    ⟨q, hqF, hqExp⟩
-  exact ⟨q, hqF, hqExp⟩
+    ⟨q, hqF, hqExt⟩
+  exact ⟨q, hqF, hqExt⟩
 
 /-- A maximizer in an exposed face realizes the support function value. -/
 lemma theorem18_8_deltaStar_eq_dotProduct_of_mem_toExposed {n : ℕ} {C : Set (Fin n → ℝ)}
@@ -882,21 +1353,21 @@ lemma theorem18_8_deltaStar_eq_dotProduct_of_mem_toExposed {n : ℕ} {C : Set (F
     le_antisymm hge hle
   simp [deltaStar_eq_sSup_image_dotProduct_right, hsSup]
 
-/-- Theorem 18.8. A closed bounded convex set is the intersection of its tangent half-spaces
-at exposed points. -/
+/-- Theorem 18.8 (extreme-point form). A closed bounded convex set is the intersection of its
+tangent half-spaces at extreme points. -/
 theorem theorem18_8_closedBoundedConvex_eq_sInter_tangentHalfspaces_exposedPoints {n : ℕ}
     (C : Set (Fin n → ℝ)) (hCclosed : IsClosed C) (hCbounded : Bornology.IsBounded C)
     (hCconv : Convex ℝ C) (hCne : C.Nonempty) :
     C =
       ⋂₀ {H : Set (Fin n → ℝ) |
         ∃ xStar p,
-          p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.exposedPoints ℝ ∧
+          p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.extremePoints ℝ ∧
             H = {x : Fin n → ℝ | dotProduct x xStar ≤ dotProduct p xStar} } := by
   classical
   let H : Set (Set (Fin n → ℝ)) :=
     {H : Set (Fin n → ℝ) |
       ∃ xStar p,
-        p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.exposedPoints ℝ ∧
+        p ∈ (dotProductCLM (n := n) xStar).toExposed C ∧ p ∈ C.extremePoints ℝ ∧
           H = {x : Fin n → ℝ | dotProduct x xStar ≤ dotProduct p xStar} }
   have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
   have hCbd :
@@ -907,7 +1378,7 @@ theorem theorem18_8_closedBoundedConvex_eq_sInter_tangentHalfspaces_exposedPoint
     intro x hxC
     refine (Set.mem_sInter).2 ?_
     intro S hS
-    rcases hS with ⟨xStar, p, hpF, _hpExp, rfl⟩
+    rcases hS with ⟨xStar, p, hpF, _hpExt, rfl⟩
     have hxle : dotProduct x xStar ≤ dotProduct p xStar := by
       simpa [dotProductCLM_apply] using (hpF.2 x hxC)
     exact hxle
@@ -915,12 +1386,12 @@ theorem theorem18_8_closedBoundedConvex_eq_sInter_tangentHalfspaces_exposedPoint
     intro x hx
     have hxle : ∀ xStar : Fin n → ℝ, dotProduct x xStar ≤ deltaStar C xStar := by
       intro xStar
-      obtain ⟨p, hpF, hpExp⟩ :=
+      obtain ⟨p, hpF, hpExt⟩ :=
         theorem18_8_exists_exposedPoint_maximizer_dotProduct (n := n) (C := C) hCclosed
           hCbounded hCne xStar
       have hxmem :
           x ∈ {x : Fin n → ℝ | dotProduct x xStar ≤ dotProduct p xStar} :=
-        (Set.mem_sInter.mp hx) _ ⟨xStar, p, hpF, hpExp, rfl⟩
+        (Set.mem_sInter.mp hx) _ ⟨xStar, p, hpF, hpExt, rfl⟩
       have hdelta :
           deltaStar C xStar = dotProduct p xStar :=
         theorem18_8_deltaStar_eq_dotProduct_of_mem_toExposed (n := n) (C := C) hCbd hpF

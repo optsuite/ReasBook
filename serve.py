@@ -29,8 +29,8 @@ class ReasBookHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(path)
         req_path = unquote(parsed.path)
 
-        if req_path.startswith(f"{SITE_ROOT}docs/"):
-            rel = req_path[len(f"{SITE_ROOT}docs/") :]
+        if req_path.startswith(f"{SITE_ROOT}docs/") or req_path.startswith("/docs/"):
+            rel = req_path.split("/docs/", 1)[1]
             site_docs = os.path.join(BOOK_SITE, "docs", rel)
             if os.path.exists(site_docs):
                 return site_docs
@@ -40,7 +40,15 @@ class ReasBookHandler(SimpleHTTPRequestHandler):
             rel = req_path[len(SITE_ROOT) :]
             return os.path.join(BOOK_SITE, rel)
 
-        raise FileNotFoundError(f"Unknown path outside {SITE_ROOT}: {req_path}")
+        # Allow unprefixed local routes such as /books/... and /papers/... to
+        # make manually-authored links work in local preview.
+        if req_path.startswith(("/books/", "/papers/", "/static/", "/index.html")):
+            rel = req_path.lstrip("/")
+            return os.path.join(BOOK_SITE, rel)
+
+        # Return a non-existing path so the base handler responds with 404
+        # instead of raising an exception traceback.
+        return os.path.join(BOOK_SITE, "__not_found__")
 
 
 def main() -> None:
