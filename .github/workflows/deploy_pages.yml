@@ -3,8 +3,6 @@ name: Deploy Verso Site to GitHub Pages
 on:
   push:
     branches: [ main ]
-  schedule:
-    - cron: '30 3 * * *'
   workflow_dispatch:
     inputs:
       full_deploy:
@@ -73,7 +71,7 @@ jobs:
           event_name = os.environ.get("GITHUB_EVENT_NAME", "")
           event_payload = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
 
-          if event_name in {"push", "schedule"}:
+          if event_name in {"push"}:
               full_deploy = True
           elif event_name == "workflow_dispatch":
               raw = str((event_payload.get("inputs") or {}).get("full_deploy", "true")).strip().lower()
@@ -198,11 +196,11 @@ jobs:
             ~/.elan/toolchains
           key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
 
-  build-monolith-docs:
+  build-monolith-site:
     needs: discover-projects
     if: needs.discover-projects.outputs.full_deploy == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 220
     env:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
@@ -255,105 +253,6 @@ jobs:
             lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
             lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Prime ReasBook cache
-        timeout-minutes: 30
-        run: |
-          set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh" ./scripts/build_reasbook_cache.sh
-
-      - name: Build shared ReasBook docs
-        timeout-minutes: 120
-        run: |
-          set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh" ./scripts/build_reasbook_shared_docs.sh
-
-      - name: Build book/paper root docs
-        timeout-minutes: 180
-        run: |
-          set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_project_docs.sh" ./scripts/build_reasbook_project_docs.sh
-
-      - name: Upload ReasBook docs artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: reasbook-doc-tree
-          path: ReasBook/.lake/build/doc
-          compression-level: 0
-          if-no-files-found: error
-
-      - name: Save ReasBook doc-data cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: ReasBook/.lake/build/doc-data
-          key: lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Save ReasBook doc cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: ReasBook/.lake/build/doc
-          key: lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
-
-      - name: Save ReasBook build cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ReasBook/.lake/build/bin
-            ReasBook/.lake/build/lib/lean
-          key: lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
-
-      - name: Save elan cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ~/.elan/bin
-            ~/.elan/toolchains
-          key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
-
-  build-monolith-site:
-    needs:
-      - discover-projects
-      - build-monolith-docs
-    if: needs.discover-projects.outputs.full_deploy == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 220
-    env:
-      HEARTBEAT_INTERVAL_SECONDS: 45
-      RETRY_ON_143_MAX_RETRIES: 1
-      RETRY_ON_143_SLEEP_SECONDS: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Restore elan cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            ~/.elan/bin
-            ~/.elan/toolchains
-          key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
-          restore-keys: |
-            elan-${{ runner.os }}-${{ runner.arch }}-
-
-      - name: Install elan (Lean toolchain manager)
-        run: |
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
-          fi
-
-      - name: Restore ReasBook build cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            ReasBook/.lake/build/bin
-            ReasBook/.lake/build/lib/lean
-          key: lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
-          restore-keys: |
-            lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
-            lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-
-
       - name: Restore ReasBookWeb build cache
         uses: actions/cache/restore@v4
         with:
@@ -383,11 +282,10 @@ jobs:
           set -euo pipefail
           ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_web.sh (Verso)" ./scripts/build_reasbook_web.sh
 
-      - name: Download ReasBook docs artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: reasbook-doc-tree
-          path: ReasBook/.lake/build/doc
+      - name: Check cached docs presence
+        run: |
+          set -euo pipefail
+          test -d ReasBook/.lake/build/doc
 
       - name: Assemble docs under ReasBookWeb/_site/docs
         timeout-minutes: 20

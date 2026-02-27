@@ -11,7 +11,11 @@ permissions:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 420
+    env:
+      HEARTBEAT_INTERVAL_SECONDS: 45
+      RETRY_ON_143_MAX_RETRIES: 1
+      RETRY_ON_143_SLEEP_SECONDS: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -60,12 +64,23 @@ jobs:
             lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
             lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Build shared ReasBook docs
+      - name: Prime ReasBook cache
+        timeout-minutes: 30
         run: |
           set -euo pipefail
-          cd ReasBook
-          ~/.elan/bin/lake -R exe cache get
-          timeout --signal=TERM --kill-after=5m 150m ~/.elan/bin/lake -R -Kenv=dev build ReasBook:docs
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh (docs_full)" ./scripts/build_reasbook_cache.sh
+
+      - name: Build shared ReasBook docs
+        timeout-minutes: 150
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh (docs_full)" ./scripts/build_reasbook_shared_docs.sh
+
+      - name: Build book/paper root docs
+        timeout-minutes: 180
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_project_docs.sh (docs_full)" ./scripts/build_reasbook_project_docs.sh
 
       - name: Upload docs artifact
         uses: actions/upload-artifact@v4
