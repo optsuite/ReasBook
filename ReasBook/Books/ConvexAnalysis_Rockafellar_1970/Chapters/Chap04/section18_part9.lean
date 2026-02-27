@@ -737,263 +737,71 @@ lemma theorem18_6_choose_selector_of_nonempty_intersections {n : ℕ} {C : Set (
   · intro k
     exact (hp k).2
 
-/-- Core bridge target: a nonempty exposed face of a compact convex set meets ambient exposed
-points. -/
-lemma theorem18_6_exists_refined_toExposed_dimDrop {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) (hCconv : Convex ℝ C) {l : (Fin n → ℝ) →L[ℝ] ℝ}
-    (hFne : (l.toExposed C).Nonempty) (hFnot : ¬ ∃ p : Fin n → ℝ, l.toExposed C = {p}) :
-    ∃ l' : (Fin n → ℝ) →L[ℝ] ℝ,
-      (l'.toExposed C).Nonempty ∧
-      (l'.toExposed C) ⊂ (l.toExposed C) ∧
-      _root_.Module.finrank ℝ (vectorSpan ℝ (l'.toExposed C)) <
-        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
-  classical
-  let F : Set (Fin n → ℝ) := l.toExposed C
-  have hnot_sub : ¬ F.Subsingleton := by
-    intro hsub
-    rcases hFne with ⟨p, hp⟩
-    have hsingle : F = {p} := Set.eq_singleton_iff_unique_mem.2 ⟨hp, fun q hq => hsub hq hp⟩
-    exact hFnot ⟨p, by simpa [F] using hsingle⟩
-  obtain ⟨x, hxF, y, hyF, hxy⟩ := (Set.not_subsingleton_iff).1 hnot_sub
-  obtain ⟨g, hgxy⟩ := geometric_hahn_banach_point_point (x := x) (y := y) hxy
-  let G : Set (Fin n → ℝ) := g.toExposed F
-  have hFcompact : IsCompact F := by
-    simpa [F] using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C)).isCompact hCcompact
-  obtain ⟨z, hzF, hzmax⟩ := hFcompact.exists_isMaxOn hFne g.continuous.continuousOn
-  have hzG : z ∈ G := by
-    refine ⟨hzF, ?_⟩
-    exact (isMaxOn_iff.mp hzmax)
-  have hGne : G.Nonempty := ⟨z, hzG⟩
-  have hGsub : G ⊆ F := fun w hw => hw.1
-  have hxnotG : x ∉ G := by
-    intro hxG
-    have hle : g y ≤ g x := hxG.2 y hyF
-    exact (not_le_of_gt hgxy) hle
-  have hGssub : G ⊂ F := by
-    refine ⟨hGsub, ?_⟩
-    intro hEq
-    exact hxnotG (hEq hxF)
-  let T2 : (Fin n → ℝ) →L[ℝ] (Fin 2 → ℝ) :=
-    ContinuousLinearMap.pi (fun i : Fin 2 => if i = 0 then l else g)
-  let S : Set (Fin 2 → ℝ) := T2 '' C
-  let p2 : Fin 2 → ℝ := T2 z
-  have hExpose : ∃ L : (Fin 2 → ℝ) →L[ℝ] ℝ, L.toExposed S = ({p2} : Set (Fin 2 → ℝ)) := by
-    -- Core 2D bridge still missing: expose the lexicographic top point in the compact image.
-    sorry
-  rcases hExpose with ⟨L, hLsingleton⟩
-  let l' : (Fin n → ℝ) →L[ℝ] ℝ := L.comp T2
-  have hmem_l' :
-      ∀ x : Fin n → ℝ, x ∈ l'.toExposed C ↔ x ∈ C ∧ T2 x ∈ L.toExposed S := by
-    intro x
-    constructor
-    · intro hx
-      refine ⟨hx.1, ?_⟩
-      refine ⟨⟨x, hx.1, rfl⟩, ?_⟩
-      intro u huS
-      rcases huS with ⟨y, hyC, rfl⟩
-      simpa [l', S] using hx.2 y hyC
-    · intro hx
-      refine ⟨hx.1, ?_⟩
-      intro y hyC
-      have hyS : T2 y ∈ S := ⟨y, hyC, rfl⟩
-      have hmax : ∀ v ∈ S, L v ≤ L (T2 x) := (hx.2).2
-      have : L (T2 y) ≤ L (T2 x) := hmax (T2 y) hyS
-      simpa [l', S] using this
-  have hmem_l'_eq :
-      ∀ x : Fin n → ℝ, x ∈ l'.toExposed C ↔ x ∈ C ∧ T2 x = p2 := by
-    intro x
-    constructor
-    · intro hx
-      rcases (hmem_l' x).1 hx with ⟨hxC, hxL⟩
-      have hxSing : T2 x ∈ ({p2} : Set (Fin 2 → ℝ)) := by simpa [hLsingleton] using hxL
-      exact ⟨hxC, Set.mem_singleton_iff.mp hxSing⟩
-    · intro hx
-      refine (hmem_l' x).2 ?_
-      refine ⟨hx.1, ?_⟩
-      simp [hLsingleton, hx.2]
-  have hEq : l'.toExposed C = G := by
-    ext x
-    constructor
-    · intro hx
-      rcases (hmem_l'_eq x).1 hx with ⟨hxC, hxT⟩
-      have hlx : l x = l z := by
-        have h0 := congrArg (fun w : Fin 2 → ℝ => w 0) hxT
-        simpa [T2, p2] using h0
-      have hxF' : x ∈ F := by
-        exact
-          (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hzF
-            hxC).2 hlx
-      have hgx : g x = g z := by
-        have h1 := congrArg (fun w : Fin 2 → ℝ => w 1) hxT
-        simpa [T2, p2] using h1
-      exact
-        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := F) (l := g) (z := z) (x := x) hzG
-          hxF').2 hgx
-    · intro hxG
-      have hxF' : x ∈ F := hxG.1
-      have hxC : x ∈ C := hxF'.1
-      have hlx : l x = l z :=
-        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := C) (l := l) (z := z) (x := x) hzF
-          hxC).1 hxF'
-      have hgx : g x = g z :=
-        (theorem18_6_mem_toExposed_iff_eq_of_mem (n := n) (C := F) (l := g) (z := z) (x := x) hzG
-          hxF').1 hxG
-      have hxT : T2 x = p2 := by
-        ext i
-        fin_cases i
-        · simp [T2, p2, hlx]
-        · simp [T2, p2, hgx]
-      exact (hmem_l'_eq x).2 ⟨hxC, hxT⟩
-  have hl'ne : (l'.toExposed C).Nonempty := by
-    simpa [hEq] using hGne
-  have hl'ssub : (l'.toExposed C) ⊂ (l.toExposed C) := by
-    simpa [hEq, F, G] using hGssub
-  have hGle : vectorSpan ℝ G ≤ vectorSpan ℝ F := vectorSpan_mono (k := ℝ) hGsub
-  have hGker : vectorSpan ℝ G ≤ LinearMap.ker g.toLinearMap :=
-    theorem18_6_vectorSpan_toExposed_le_ker (n := n) (A := F) g
-  have hvF : y -ᵥ x ∈ vectorSpan ℝ F := vsub_mem_vectorSpan (k := ℝ) hyF hxF
-  have hvnot : y -ᵥ x ∉ vectorSpan ℝ G := by
-    intro hvG
-    have hvker : g.toLinearMap (y -ᵥ x) = 0 := by
-      have hvker' : y -ᵥ x ∈ LinearMap.ker g.toLinearMap := hGker hvG
-      simpa using hvker'
-    have hgv : g.toLinearMap (y -ᵥ x) = g y - g x := by
-      change g (y -ᵥ x) = g y - g x
-      simp [vsub_eq_sub, g.map_sub]
-    have hgvne : g.toLinearMap (y -ᵥ x) ≠ 0 := by
-      have : g y - g x ≠ 0 := by linarith [hgxy]
-      simpa [hgv] using this
-    exact hgvne hvker
-  have hne : vectorSpan ℝ G ≠ vectorSpan ℝ F := by
-    intro hEqGF
-    have hvG : y -ᵥ x ∈ vectorSpan ℝ G := by simpa [hEqGF] using hvF
-    exact hvnot hvG
-  have hlt : vectorSpan ℝ G < vectorSpan ℝ F := lt_of_le_of_ne hGle hne
-  have hfin : _root_.Module.finrank ℝ (vectorSpan ℝ G) < _root_.Module.finrank ℝ (vectorSpan ℝ F) :=
-    Submodule.finrank_lt_finrank_of_lt hlt
-  have hfin' :
-      _root_.Module.finrank ℝ (vectorSpan ℝ (l'.toExposed C)) <
-        _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) := by
-    rw [hEq]
-    simpa [F, G] using hfin
-  exact ⟨l', hl'ne, hl'ssub, hfin'⟩
 
-/-- Core bridge target: a nonempty exposed face of a compact convex set meets ambient exposed
-points. -/
-lemma theorem18_6_exposedFace_inter_exposedPoints_nonempty {n : ℕ}
-    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C) (hCconv : Convex ℝ C)
-    {l : (Fin n → ℝ) →L[ℝ] ℝ} (hFne : (l.toExposed C).Nonempty) :
-    (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty := by
-  classical
-  let μ : ((Fin n → ℝ) →L[ℝ] ℝ) → ℕ := fun l =>
-    _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C))
-  have hmain :
-      ∀ l : (Fin n → ℝ) →L[ℝ] ℝ, (l.toExposed C).Nonempty →
-        (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty := by
-    intro l
-    show (l.toExposed C).Nonempty → (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty
-    refine
-      (measure μ).wf.induction
-        (C := fun l : (Fin n → ℝ) →L[ℝ] ℝ =>
-          (l.toExposed C).Nonempty → (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty)
-        l ?_
-    intro l ih hFne
-    by_cases hdim : μ l = 0
-    ·
-      rcases
-          theorem18_6_singleton_of_finrank_vectorSpan_eq_zero (n := n) (F := l.toExposed C) hFne
-            hdim with ⟨p, hp⟩
-      have hExp : IsExposed ℝ C ({p} : Set (Fin n → ℝ)) := by
-        simpa [hp] using (ContinuousLinearMap.toExposed.isExposed (l := l) (A := C))
-      have hpExp : p ∈ C.exposedPoints ℝ :=
-        theorem18_6_exposedPoint_of_exposed_singleton (n := n) (C := C) (p := p) hExp
-      have hpF : p ∈ l.toExposed C := by simp [hp]
-      exact ⟨p, hpExp, hpF⟩
-    ·
-      have hFnot : ¬ ∃ p : Fin n → ℝ, l.toExposed C = ({p} : Set (Fin n → ℝ)) := by
-        intro hsingle
-        rcases hsingle with ⟨p, hp⟩
-        have hsub : (l.toExposed C).Subsingleton := by simp [hp]
-        have hbot : vectorSpan ℝ (l.toExposed C) = ⊥ :=
-          (vectorSpan_eq_bot_iff_subsingleton (k := ℝ) (s := l.toExposed C)).2 hsub
-        have hfin0 : _root_.Module.finrank ℝ (vectorSpan ℝ (l.toExposed C)) = 0 :=
-          (Submodule.finrank_eq_zero).2 hbot
-        exact hdim hfin0
-      rcases
-          theorem18_6_exists_refined_toExposed_dimDrop (n := n) (C := C) hCcompact hCconv
-            (l := l) hFne hFnot with
-        ⟨l', hF'ne, hF'ssub, hdimlt⟩
-      have hrec : (C.exposedPoints ℝ ∩ l'.toExposed C).Nonempty := ih l' hdimlt hF'ne
-      rcases hrec with ⟨p, hpExp, hpF'⟩
-      exact ⟨p, hpExp, hF'ssub.1 hpF'⟩
-  exact hmain l hFne
-
-/-- Straszewicz perturbation core (existence form): for a nonempty exposed face `l.toExposed C`,
-there exists a perturbation direction whose discrete perturbations keep meeting ambient exposed
-points. -/
-lemma theorem18_6_exists_perturbation_with_nonempty_exposed_intersections {n : ℕ}
-    {C : Set (Fin n → ℝ)} (hCcompact : IsCompact C) (hCconv : Convex ℝ C)
-    {l : (Fin n → ℝ) →L[ℝ] ℝ} (hFne : (l.toExposed C).Nonempty) :
-    ∃ g : (Fin n → ℝ) →L[ℝ] ℝ,
-      ∀ k : ℕ,
-        (C.exposedPoints ℝ ∩ (l + (1 / ((k : ℝ) + 1)) • g).toExposed C).Nonempty := by
-  have hBase : (C.exposedPoints ℝ ∩ l.toExposed C).Nonempty :=
-    theorem18_6_exposedFace_inter_exposedPoints_nonempty (n := n) (C := C) hCcompact hCconv
-      (l := l) hFne
-  refine ⟨0, ?_⟩
-  intro k
-  simpa [smul_zero, add_zero] using hBase
-
-/-- Straszewicz bridge core (existence form):
-any nonempty exposed face of a compact convex set contains a point in the closure of ambient
-exposed points. -/
-lemma theorem18_6_exposedFace_contains_closureExposedPoint_fin {n : ℕ} {C : Set (Fin n → ℝ)}
-    (hCcompact : IsCompact C) (hCconv : Convex ℝ C) {F : Set (Fin n → ℝ)}
-    (hFexposed : IsExposed ℝ C F) (hFne : F.Nonempty) :
-    ∃ p ∈ F, p ∈ closure (C.exposedPoints ℝ) := by
-  rcases theorem18_6_exposed_eq_toExposed (n := n) (C := C) (F := F) hFexposed hFne with ⟨l, rfl⟩
-  have hBridge :
-      ∃ p ∈ l.toExposed C, p ∈ closure (C.exposedPoints ℝ) := by
-    rcases
-        theorem18_6_exists_perturbation_with_nonempty_exposed_intersections (n := n) (C := C)
-          hCcompact hCconv (l := l) hFne with
-      ⟨g, hNonempty⟩
-    rcases
-        theorem18_6_choose_selector_of_nonempty_intersections (n := n) (C := C) (l := l)
-          (g := g) hNonempty with
-      ⟨p, hpExp, hpPert⟩
-    have hB : ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ C, |g x| ≤ B :=
-      theorem18_6_exists_abs_bound_on_compact (n := n) (C := C) hCcompact g
-    let ε : ℕ → ℝ := fun k => 1 / ((k : ℝ) + 1)
-    have hε : Filter.Tendsto ε Filter.atTop (nhds 0) := tendsto_one_div_add_atTop_nhds_zero_nat
-    have hpPert' : ∀ k, p k ∈ (l + ε k • g).toExposed C := by
-      intro k
-      simpa [ε] using hpPert k
-    rcases
-        theorem18_6_compact_extract_subseq_exposed_perturbed (n := n) (C := C) hCcompact
-          (l := l) (g := g) (ε := ε) (p := p) hpExp hpPert' with
-      ⟨z, hzC, φ, hφmono, hφtend, hpExpφ, hpPertφ⟩
-    have hεφ : Filter.Tendsto (fun k => ε (φ k)) Filter.atTop (nhds 0) :=
-      hε.comp hφmono.tendsto_atTop
-    have hTerms :=
-      theorem18_6_perturbation_terms_tendsto_zero (n := n) (C := C)
-        (g := g) (ε := fun k => ε (φ k)) (p := fun k => p (φ k)) hεφ hB
-        (fun k => (hpPertφ k).1)
-    have hSeq :
-        ∃ (g : (Fin n → ℝ) →L[ℝ] ℝ) (ε : ℕ → ℝ) (p : ℕ → (Fin n → ℝ)) (z : Fin n → ℝ),
-          z ∈ C ∧
-            (∀ k, p k ∈ C.exposedPoints ℝ) ∧
-            (∀ k, p k ∈ (l + ε k • g).toExposed C) ∧
-            Filter.Tendsto p Filter.atTop (nhds z) ∧
-            Filter.Tendsto (fun k => ε k * g (p k)) Filter.atTop (nhds 0) ∧
-            (∀ y ∈ C, Filter.Tendsto (fun k => ε k * g y) Filter.atTop (nhds 0)) :=
-      ⟨g, (fun k => ε (φ k)), (fun k => p (φ k)), z, hzC, hpExpφ, hpPertφ, hφtend,
-        hTerms.1, hTerms.2⟩
-    rcases hSeq with ⟨g, ε, p, z, hzC, hpExp, hpPert, hpTend, hεgP, hεgConst⟩
-    exact
-      theorem18_6_bridge_of_perturbation_limit (C := C) (l := l) (g := g) (ε := ε) (p := p)
-        (z := z) hzC hpExp hpPert hpTend hεgP hεgConst
-  exact hBridge
+/-- A Euclidean-farthest point from `y` in `C` is an exposed point of `C`. -/
+lemma theorem18_6_mem_exposedPoints_of_isMaxOn_dotProduct_sub_self {n : ℕ}
+    {C : Set (Fin n → ℝ)} {y p : Fin n → ℝ} (hpC : p ∈ C)
+    (hpmax : IsMaxOn (fun z : Fin n → ℝ => dotProduct (z - y) (z - y)) C p) :
+    p ∈ C.exposedPoints ℝ := by
+  let m : (Fin n → ℝ) →L[ℝ] ℝ :=
+    LinearMap.toContinuousLinearMap
+      ((LinearMap.flip (dotProductBilin (R := ℝ) (S := ℝ) (m := Fin n) (A := ℝ))) (p - y))
+  have hm : ∀ z : Fin n → ℝ, m z = dotProduct z (p - y) := by
+    intro z
+    simp [m, LinearMap.flip_apply, dotProductBilin]
+  refine ⟨hpC, m, ?_⟩
+  intro q hqC
+  have hqmax : dotProduct (q - y) (q - y) ≤ dotProduct (p - y) (p - y) :=
+    (isMaxOn_iff.mp hpmax) q hqC
+  have hcross_le : dotProduct (q - y) (p - y) ≤ dotProduct (p - y) (p - y) := by
+    have hnonneg : 0 ≤ dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) := by
+      simpa using (dotProduct_self_star_nonneg (v := (q - y) - (p - y)))
+    have hsq :
+        dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) =
+          dotProduct (q - y) (q - y) - 2 * dotProduct (q - y) (p - y) +
+            dotProduct (p - y) (p - y) := by
+      simp [dotProduct_comm, two_mul, sub_eq_add_neg, add_left_comm, add_comm]
+      ring
+    nlinarith [hnonneg, hsq, hqmax]
+  have hqsub :
+      dotProduct (q - y) (p - y) = dotProduct q (p - y) - dotProduct y (p - y) := by
+    simpa using (sub_dotProduct q y (p - y))
+  have hpsub :
+      dotProduct (p - y) (p - y) = dotProduct p (p - y) - dotProduct y (p - y) := by
+    simpa using (sub_dotProduct p y (p - y))
+  have hdot_le : dotProduct q (p - y) ≤ dotProduct p (p - y) := by
+    linarith [hcross_le, hqsub, hpsub]
+  have hmq : m q ≤ m p := by
+    simpa [hm] using hdot_le
+  refine ⟨hmq, ?_⟩
+  intro hmpq
+  have hmEq : m q = m p := le_antisymm hmq hmpq
+  have hdot_eq : dotProduct q (p - y) = dotProduct p (p - y) := by
+    simpa [hm] using hmEq
+  have hcross_eq : dotProduct (q - y) (p - y) = dotProduct (p - y) (p - y) := by
+    linarith [hdot_eq, hqsub, hpsub]
+  have hnonneg : 0 ≤ dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) := by
+    simpa using (dotProduct_self_star_nonneg (v := (q - y) - (p - y)))
+  have hsq :
+      dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) =
+        dotProduct (q - y) (q - y) - 2 * dotProduct (q - y) (p - y) +
+          dotProduct (p - y) (p - y) := by
+    simp [dotProduct_comm, two_mul, sub_eq_add_neg, add_left_comm, add_comm]
+    ring
+  have hsq_le_zero : dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) ≤ 0 := by
+    nlinarith [hsq, hqmax, hcross_eq]
+  have hsq_zero : dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) = 0 :=
+    le_antisymm hsq_le_zero hnonneg
+  have hqp_zero : dotProduct (q - p) (q - p) = 0 := by
+    have hrewrite : q - p = (q - y) - (p - y) := by
+      abel_nf
+    calc
+      dotProduct (q - p) (q - p)
+          = dotProduct ((q - y) - (p - y)) ((q - y) - (p - y)) := by
+              rw [hrewrite]
+      _ = 0 := hsq_zero
+  have hqp : q - p = 0 := dotProduct_self_eq_zero.mp hqp_zero
+  exact sub_eq_zero.mp hqp
 
 /-- Theorem 18.6. Every extreme point lies in the closure of the exposed points (bounded case). -/
 theorem theorem18_6_extremePoints_subset_closure_exposedPoints {n : ℕ} (C : Set (Fin n → ℝ))
@@ -1003,18 +811,121 @@ theorem theorem18_6_extremePoints_subset_closure_exposedPoints {n : ℕ} (C : Se
   intro x hxext
   have hxext' : IsExtremePoint (𝕜 := ℝ) C x :=
     (isExtremePoint_iff_mem_extremePoints (𝕜 := ℝ) (C := C) (x := x)).2 hxext
+  have hxC : x ∈ C := hxext'.1
   by_contra hxnot
-  obtain ⟨l, hFne, hFexposed, hFsub⟩ :=
-    theorem18_6_exists_exposedFace_disjoint_C0 (n := n) (C := C) hCclosed hCbounded hCconv
-      (x := x) hxext' hxnot
+  let C0 : Set (Fin n → ℝ) := conv (closure (C.exposedPoints ℝ))
   have hCcompact : IsCompact C := cor1721_isCompact_S (n := n) (S := C) hCclosed hCbounded
-  rcases
-      theorem18_6_exposedFace_contains_closureExposedPoint_fin (n := n) (C := C) hCcompact hCconv
-        (F := l.toExposed C) hFexposed hFne with ⟨q, hqF, hqcl⟩
-  have hqC0 : q ∈ conv (closure (C.exposedPoints ℝ)) := by
-    simpa [conv] using
-      (subset_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)) hqcl)
-  exact (hFsub hqF).2 hqC0
+  have hC0closed : IsClosed C0 :=
+    (theorem18_6_isClosed_conv_closure_exposedPoints (n := n) (C := C) hCclosed hCbounded
+      hCconv).1
+  have hC0conv : Convex ℝ C0 := by
+    simpa [C0, conv] using
+      (convex_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)))
+  have hxnotC0 : x ∉ C0 := by
+    simpa [C0] using
+      theorem18_6_not_mem_C0_of_extreme_not_mem_closure_exposedPoints (n := n) (C := C) hCclosed
+        hCbounded hCconv (x := x) hxext' hxnot
+  obtain ⟨l, r, hlC0, hrx⟩ := geometric_hahn_banach_closed_point (s := C0) hC0conv hC0closed hxnotC0
+  let b : Fin n → ℝ := fun i => l (Pi.single (M := fun _ : Fin n => ℝ) i (1 : ℝ))
+  have hl_apply : ∀ z : Fin n → ℝ, l z = dotProduct z b := by
+    simpa [b] using (strongDual_apply_eq_dotProduct (n := n) l)
+  let qfun : (Fin n → ℝ) → ℝ := fun z => dotProduct (z - x) (z - x)
+  have hqcont : ContinuousOn qfun C := by
+    have hcont : Continuous qfun := by
+      simpa [qfun] using
+        ((continuous_id.sub continuous_const) : Continuous fun z : Fin n → ℝ => z - x).dotProduct
+          ((continuous_id.sub continuous_const) : Continuous fun z : Fin n → ℝ => z - x)
+    exact hcont.continuousOn
+  obtain ⟨x0, hx0C, hx0max⟩ := hCcompact.exists_isMaxOn ⟨x, hxC⟩ hqcont
+  let B : ℝ := qfun x0
+  have hBbound : ∀ z ∈ C, qfun z ≤ B := by
+    intro z hzC
+    exact (isMaxOn_iff.mp hx0max) z hzC
+  have hBnonneg : 0 ≤ B := by
+    have hxB : qfun x ≤ B := hBbound x hxC
+    simpa [B, qfun] using hxB
+  let lam : ℝ := (B + 1) / (2 * (l x - r))
+  have hlampos : 0 < lam := by
+    have hnumpos : 0 < B + 1 := by nlinarith [hBnonneg]
+    have hdenpos : 0 < 2 * (l x - r) := by nlinarith [hrx]
+    exact div_pos hnumpos hdenpos
+  let y : Fin n → ℝ := x - lam • b
+  have hdist_lt :
+      ∀ z ∈ C, l z ≤ r → dotProduct (z - y) (z - y) < dotProduct (x - y) (x - y) := by
+    intro z hzC hzr
+    have hBz : dotProduct (z - x) (z - x) ≤ B := by
+      simpa [qfun] using (hBbound z hzC)
+    have hxy : x - y = lam • b := by
+      simp [y, sub_eq_add_neg, add_comm]
+    have hzy : z - y = (z - x) + (x - y) := by
+      abel
+    have hzx_dot : dotProduct (z - x) b = l z - l x := by
+      rw [sub_dotProduct]
+      simp [hl_apply z, hl_apply x]
+    have hformula :
+        dotProduct (z - y) (z - y) =
+          dotProduct (z - x) (z - x) + 2 * lam * (l z - l x) + dotProduct (x - y) (x - y) := by
+      rw [hzy]
+      rw [dotProduct_add, add_dotProduct]
+      rw [dotProduct_comm (x - y) (z - x)]
+      rw [hxy]
+      rw [dotProduct_smul, smul_dotProduct]
+      rw [add_dotProduct]
+      rw [dotProduct_smul, smul_dotProduct]
+      rw [hzx_dot]
+      simp [smul_eq_mul, mul_assoc]
+      ring
+    have hsub_le : l z - l x ≤ r - l x := by linarith
+    have hmul_le : 2 * lam * (l z - l x) ≤ 2 * lam * (r - l x) := by
+      have hlamnonneg : 0 ≤ lam := le_of_lt hlampos
+      nlinarith [hsub_le, hlamnonneg]
+    have hsum_eq : B + 2 * lam * (r - l x) = -1 := by
+      have hlamdef : lam = (B + 1) / (2 * (l x - r)) := rfl
+      have hne : l x - r ≠ 0 := by linarith [hrx]
+      have hratio : (r - l x) / (l x - r) = -1 := by
+        field_simp [hne]
+        ring
+      calc
+        B + 2 * lam * (r - l x)
+            = B + 2 * ((B + 1) / (2 * (l x - r))) * (r - l x) := by rw [hlamdef]
+        _ = B + ((B + 1) / (l x - r)) * (r - l x) := by
+              congr 1
+              field_simp
+        _ = B + (B + 1) * ((r - l x) / (l x - r)) := by
+              field_simp [hne]
+        _ = B + (B + 1) * (-1) := by rw [hratio]
+        _ = -1 := by ring
+    have hsum_neg : B + 2 * lam * (r - l x) < 0 := by
+      nlinarith [hsum_eq]
+    have hmain_lt : dotProduct (z - x) (z - x) + 2 * lam * (l z - l x) < 0 := by
+      have hmain_le :
+          dotProduct (z - x) (z - x) + 2 * lam * (l z - l x) ≤ B + 2 * lam * (r - l x) :=
+        add_le_add hBz hmul_le
+      exact lt_of_le_of_lt hmain_le hsum_neg
+    linarith [hformula, hmain_lt]
+  have hcontFar : ContinuousOn (fun z : Fin n → ℝ => dotProduct (z - y) (z - y)) C := by
+    have hcont : Continuous (fun z : Fin n → ℝ => dotProduct (z - y) (z - y)) := by
+      simpa using
+        ((continuous_id.sub continuous_const) : Continuous fun z : Fin n → ℝ => z - y).dotProduct
+          ((continuous_id.sub continuous_const) : Continuous fun z : Fin n → ℝ => z - y)
+    exact hcont.continuousOn
+  obtain ⟨p, hpC, hpmax⟩ := hCcompact.exists_isMaxOn ⟨x, hxC⟩ hcontFar
+  have hpOutside : r < l p := by
+    by_contra hpNot
+    have hple : l p ≤ r := le_of_not_gt hpNot
+    have hpLt : dotProduct (p - y) (p - y) < dotProduct (x - y) (x - y) := hdist_lt p hpC hple
+    have hxLe : dotProduct (x - y) (x - y) ≤ dotProduct (p - y) (p - y) :=
+      (isMaxOn_iff.mp hpmax) x hxC
+    exact (not_le_of_gt hpLt) hxLe
+  have hpExp : p ∈ C.exposedPoints ℝ :=
+    theorem18_6_mem_exposedPoints_of_isMaxOn_dotProduct_sub_self (C := C) (y := y) (p := p) hpC
+      hpmax
+  have hpC0 : p ∈ C0 := by
+    have hpcl : p ∈ closure (C.exposedPoints ℝ) := subset_closure hpExp
+    simpa [C0, conv] using
+      (subset_convexHull (𝕜 := ℝ) (s := closure (C.exposedPoints ℝ)) hpcl)
+  have hpLtR : l p < r := hlC0 p hpC0
+  exact (not_lt_of_ge (le_of_lt hpOutside)) hpLtR
 
 /-- The RHS mixed convex hull is contained in the closed convex set. -/
 lemma theorem18_7_rhs_subset_C {n : ℕ} {C : Set (Fin n → ℝ)} (hCclosed : IsClosed C)
