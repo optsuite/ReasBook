@@ -73,7 +73,7 @@ jobs:
           event_name = os.environ.get("GITHUB_EVENT_NAME", "")
           event_payload = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
 
-          if event_name == "schedule":
+          if event_name in {"push", "schedule"}:
               full_deploy = True
           elif event_name == "workflow_dispatch":
               raw = str((event_payload.get("inputs") or {}).get("full_deploy", "true")).strip().lower()
