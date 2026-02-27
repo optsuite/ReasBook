@@ -42,6 +42,15 @@ jobs:
             lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
             lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-
 
+      - name: Restore ReasBook doc-data cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ReasBook/.lake/build/doc-data
+          key: lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          restore-keys: |
+            lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
+            lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Build shared ReasBook docs
         run: |
           set -euo pipefail
@@ -54,6 +63,13 @@ jobs:
         with:
           name: full-docs-shared
           path: ReasBook/.lake/build/doc
+
+      - name: Save ReasBook doc-data cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ReasBook/.lake/build/doc-data
+          key: lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Save ReasBook build cache
         if: always()
