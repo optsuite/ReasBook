@@ -61,6 +61,8 @@ jobs:
     timeout-minutes: 360
     env:
       HEARTBEAT_INTERVAL_SECONDS: 45
+      RETRY_ON_143_MAX_RETRIES: 1
+      RETRY_ON_143_SLEEP_SECONDS: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -77,17 +79,35 @@ jobs:
           restore-keys: |
             lake-shared-${{ runner.os }}-${{ runner.arch }}-
 
-      - name: Build Lean project and docs
-        timeout-minutes: 150
+      - name: Prime ReasBook cache
+        timeout-minutes: 30
         run: |
           set -euo pipefail
-          ./scripts/ci_heartbeat.sh "build.sh (Lean + doc-gen)" ./build.sh
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh" ./scripts/build_reasbook_cache.sh
+
+      - name: Build shared ReasBook docs
+        timeout-minutes: 120
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh" ./scripts/build_reasbook_shared_docs.sh
+
+      - name: Build book/paper root docs
+        timeout-minutes: 180
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_project_docs.sh" ./scripts/build_reasbook_project_docs.sh
+
+      - name: Build ReasBook core target
+        timeout-minutes: 90
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_core.sh" ./scripts/build_reasbook_core.sh
 
       - name: Build ReasBookWeb (sections + Verso)
         timeout-minutes: 180
         run: |
           set -euo pipefail
-          ./scripts/ci_heartbeat.sh "build_reasbook_web.sh (Verso)" ./scripts/build_reasbook_web.sh
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_web.sh (Verso)" ./scripts/build_reasbook_web.sh
 
       - name: Assemble docs under ReasBookWeb/_site/docs
         timeout-minutes: 20
