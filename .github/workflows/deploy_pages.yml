@@ -246,6 +246,15 @@ jobs:
             lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
             lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-
 
+      - name: Restore ReasBook doc cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ReasBook/.lake/build/doc
+          key: lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}
+          restore-keys: |
+            lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-
+            lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-
+
       - name: Prime ReasBook cache
         timeout-minutes: 30
         run: |
@@ -278,6 +287,13 @@ jobs:
         with:
           path: ReasBook/.lake/build/doc-data
           key: lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save ReasBook doc cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: ReasBook/.lake/build/doc
+          key: lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Save ReasBook build cache
         if: always()
