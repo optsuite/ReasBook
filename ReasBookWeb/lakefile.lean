@@ -46,8 +46,11 @@ def loadSections (pkg : NPackage n) : IO (Array (Lean.Name × String)) := do
       out := out.push entry
   pure out
 
-/-- Ensure the main project has generated `+<module>:literate` JSON. -/
-def buildLiterateJson (pkg : NPackage n) (mod : String) : LogIO Unit := do
+/-- Build `+<module>:literate` JSON for many modules in one Lake invocation. -/
+def buildLiterateJsonBatch (pkg : NPackage n) (mods : Array String) : LogIO Unit := do
+  if mods.isEmpty then
+    return
+
   let lakeVars :=
     #["LAKE", "LAKE_HOME", "LAKE_PKG_URL_MAP",
       "LEAN_SYSROOT", "LEAN_AR", "LEAN_PATH", "LEAN_SRC_PATH",
@@ -65,7 +68,9 @@ def buildLiterateJson (pkg : NPackage n) (mod : String) : LogIO Unit := do
   f.lock (exclusive := true)
   try
     let cmd := "elan"
-    let args := #["run", "--install", toolchain, "lake", "build", s!"+{mod}:literate"]
+    let mut args := #["run", "--install", toolchain, "lake", "build"]
+    for mod in mods do
+      args := args.push s!"+{mod}:literate"
     proc (quiet := true) {
       cmd, args, cwd := pkg.dir / reasbookRoot,
       env := lakeVars.map (·, none)
@@ -78,6 +83,11 @@ target genLib (pkg) : Unit := do
   -- Keep generator and `ReasBookSite/LiterateModule.lean` syntax in sync.
   let pageCmd := "reasbook_page"
   let sections ← liftM (m := LogIO) <| loadSections pkg
+
+  -- Batch all literate-json builds to avoid spawning one `lake build` process per module.
+  let modulesToBuild := sections.map (fun (module, _) => module.toString)
+  liftM (m := LogIO) <| buildLiterateJsonBatch pkg modulesToBuild
+
   let j1 ← Job.mixArray <$> sections.mapM fun (module, title) => Job.async do
     let leanModName := `Book ++ module
     let declName := `Book ++ module
@@ -88,7 +98,6 @@ target genLib (pkg) : Unit := do
     let origLeanFile : System.FilePath := pkg.dir / reasbookRoot / origName
     addTrace (← computeTrace <| TextFilePath.mk origLeanFile)
 
-    let jsonSentinel := defaultBuildDir / "originals" / module.toString
     let jsonName := "/".intercalate (module.components.map (·.toString)) ++ ".json"
     let jsonFile : System.FilePath := pkg.dir / reasbookRoot / ".lake" / "build" / "literate" / jsonName
     let isHomePage :=
@@ -99,15 +108,11 @@ target genLib (pkg) : Unit := do
         | _ => false
       | [] => false
 
-    addPureTrace (caption := "{jsonFile} exists") (← jsonFile.pathExists)
-
-    buildFileUnlessUpToDate' jsonSentinel do
-      logVerbose s!"Generating highlighting info for {module}"
-      buildLiterateJson pkg module.toString
-      let trace ← computeTrace (TextFilePath.mk jsonFile)
-      addTrace trace
-      createParentDirs jsonSentinel
-      IO.FS.writeFile jsonSentinel (toString (repr trace))
+    let jsonExists ← jsonFile.pathExists
+    addPureTrace (caption := "{jsonFile} exists") jsonExists
+    unless jsonExists do
+      error s!"Missing generated literate JSON for {module}: {jsonFile}"
+    addTrace (← computeTrace (TextFilePath.mk jsonFile))
 
     let navMeta :=
       if isHomePage then
