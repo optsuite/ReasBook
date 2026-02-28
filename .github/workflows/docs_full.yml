@@ -128,7 +128,7 @@ jobs:
       - name: Build shared ReasBook docs chunk 1 (core modules)
         timeout-minutes: 75
         env:
-          SHARED_DOC_MODULES: SiteSupport.LiterateModule
+          SHARED_DOC_MODULES: ReasBook
         run: |
           set -euo pipefail
           ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh (docs_full:chunk1)" ./scripts/build_reasbook_shared_docs.sh

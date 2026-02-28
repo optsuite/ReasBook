@@ -10,8 +10,8 @@ cd "$ROOT_DIR/ReasBook"
 
 declare -a modules=()
 
-# Default to light-weight shared modules only.
-raw_modules="${SHARED_DOC_MODULES:-SiteSupport.LiterateModule}"
+# Default to a valid shared baseline module.
+raw_modules="${SHARED_DOC_MODULES:-ReasBook}"
 while IFS= read -r item; do
   item="$(printf '%s' "$item" | xargs)"
   [ -n "$item" ] || continue
