@@ -55,15 +55,38 @@ jobs:
   build-shared-docs:
     name: build-shared-docs
     needs: prepare-project-doc-modules
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 300
     env:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
       RETRY_ON_143_SLEEP_SECONDS: 20
+      PERSIST_ROOT: ${{ vars.REASBOOK_PERSIST_ROOT }}
       SHARED_DOC_MODULES_EXTRA: ""
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare persistent build directories
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          echo "PERSIST_ROOT=$persist_root" >> "$GITHUB_ENV"
+          echo "Using persistent root: $persist_root"
+          mkdir -p "$persist_root/reasbook_lake" \
+                   "$persist_root/reasbookweb_lake" \
+                   "$persist_root/elan"
+          rm -rf ReasBook/.lake ReasBookWeb/.lake
+          ln -sfn "$persist_root/reasbook_lake" ReasBook/.lake
+          ln -sfn "$persist_root/reasbookweb_lake" ReasBookWeb/.lake
+          if [ -d "$persist_root/elan" ] && [ -n "$(ls -A "$persist_root/elan" 2>/dev/null)" ]; then
+            mkdir -p "$HOME/.elan"
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a "$persist_root/elan/" "$HOME/.elan/"
+            else
+              cp -a "$persist_root/elan/." "$HOME/.elan/"
+            fi
+          fi
 
       - name: Restore elan cache
         continue-on-error: true
@@ -118,7 +141,9 @@ jobs:
         timeout-minutes: 30
         run: |
           set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh (docs_full)" ./scripts/build_reasbook_cache.sh
+          if ! ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh (docs_full)" ./scripts/build_reasbook_cache.sh; then
+            echo "[docs_full][shared] cache get failed; continuing with local build"
+          fi
 
       - name: Clean project docs roots before shared build
         run: |
@@ -205,13 +230,29 @@ jobs:
             ~/.elan/toolchains
           key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
 
+      - name: Persist elan toolchain
+        if: always()
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          mkdir -p "$persist_root/elan"
+          if [ -d "$HOME/.elan" ]; then
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a --delete "$HOME/.elan/" "$persist_root/elan/"
+            else
+              rm -rf "$persist_root/elan"/*
+              cp -a "$HOME/.elan/." "$persist_root/elan/"
+            fi
+          fi
+
   build-project-root-docs:
     name: build-project-root-docs (${{ matrix.project.module }})
     needs:
       - prepare-project-doc-modules
       - build-shared-docs
     if: needs.prepare-project-doc-modules.outputs.project_count != '0'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 360
     strategy:
       fail-fast: false
@@ -222,9 +263,32 @@ jobs:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
       RETRY_ON_143_SLEEP_SECONDS: 20
+      PERSIST_ROOT: ${{ vars.REASBOOK_PERSIST_ROOT }}
       PROJECT_DOC_MODULES: ${{ matrix.project.module }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare persistent build directories
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          echo "PERSIST_ROOT=$persist_root" >> "$GITHUB_ENV"
+          echo "Using persistent root: $persist_root"
+          mkdir -p "$persist_root/reasbook_lake" \
+                   "$persist_root/reasbookweb_lake" \
+                   "$persist_root/elan"
+          rm -rf ReasBook/.lake ReasBookWeb/.lake
+          ln -sfn "$persist_root/reasbook_lake" ReasBook/.lake
+          ln -sfn "$persist_root/reasbookweb_lake" ReasBookWeb/.lake
+          if [ -d "$persist_root/elan" ] && [ -n "$(ls -A "$persist_root/elan" 2>/dev/null)" ]; then
+            mkdir -p "$HOME/.elan"
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a "$persist_root/elan/" "$HOME/.elan/"
+            else
+              cp -a "$persist_root/elan/." "$HOME/.elan/"
+            fi
+          fi
 
       - name: Restore elan cache
         continue-on-error: true
@@ -286,6 +350,22 @@ jobs:
           test -d "$src"
           mkdir -p "$(dirname "$dst")"
           cp -a "$src" "$dst"
+
+      - name: Persist elan toolchain
+        if: always()
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          mkdir -p "$persist_root/elan"
+          if [ -d "$HOME/.elan" ]; then
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a --delete "$HOME/.elan/" "$persist_root/elan/"
+            else
+              rm -rf "$persist_root/elan"/*
+              cp -a "$HOME/.elan/." "$persist_root/elan/"
+            fi
+          fi
 
       - name: Upload project root docs artifact
         uses: actions/upload-artifact@v4

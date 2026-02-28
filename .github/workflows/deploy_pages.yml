@@ -122,53 +122,36 @@ jobs:
   check-doc-cache:
     needs: discover-projects
     if: needs.discover-projects.outputs.full_deploy == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
+    env:
+      PERSIST_ROOT: ${{ vars.REASBOOK_PERSIST_ROOT }}
     outputs:
-      doc_cache_hit: ${{ steps.doc_cache.outputs.cache-hit }}
+      doc_cache_hit: ${{ steps.doc_cache_state.outputs.doc_cache_exact }}
       doc_cache_exact: ${{ steps.doc_cache_state.outputs.doc_cache_exact }}
       doc_cache_available: ${{ steps.doc_cache_state.outputs.doc_cache_available }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check ReasBook final doc cache availability
-        id: doc_cache
-        continue-on-error: true
-        uses: actions/cache/restore@v4
-        with:
-          path: ReasBook/.lake/build/doc
-          key: lake-reasbook-docfinal-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-${{ github.sha }}
-          restore-keys: |
-            lake-reasbook-docfinal-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-
-            lake-reasbook-docfinal-v1-${{ runner.os }}-${{ runner.arch }}-
-          lookup-only: true
-
-      - name: Check ReasBook legacy doc cache availability
-        id: doc_cache_legacy
-        continue-on-error: true
-        uses: actions/cache/restore@v4
-        with:
-          path: ReasBook/.lake/build/doc
-          key: lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-seed
-          restore-keys: |
-            lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-
-            lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-
-          lookup-only: true
+      - name: Prepare persistent ReasBook lake directory
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          echo "PERSIST_ROOT=$persist_root" >> "$GITHUB_ENV"
+          echo "Using persistent root: $persist_root"
+          mkdir -p "$persist_root/reasbook_lake"
+          rm -rf ReasBook/.lake
+          ln -sfn "$persist_root/reasbook_lake" ReasBook/.lake
 
       - name: Derive doc cache availability
         id: doc_cache_state
         run: |
           set -euo pipefail
-          cache_hit='${{ steps.doc_cache.outputs.cache-hit }}'
-          matched_key='${{ steps.doc_cache.outputs.cache-matched-key }}'
-          legacy_matched_key='${{ steps.doc_cache_legacy.outputs.cache-matched-key }}'
-          if [ "$cache_hit" = "true" ]; then
+          if [ -f ReasBook/.lake/build/doc/index.html ]; then
             echo "doc_cache_exact=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "doc_cache_exact=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ -n "$matched_key" ] || [ -n "$legacy_matched_key" ]; then
             echo "doc_cache_available=true" >> "$GITHUB_OUTPUT"
           else
+            echo "doc_cache_exact=false" >> "$GITHUB_OUTPUT"
             echo "doc_cache_available=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -184,15 +167,38 @@ jobs:
   build-changed-projects:
     needs: discover-projects
     if: needs.discover-projects.outputs.full_deploy != 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 150
     env:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
       RETRY_ON_143_SLEEP_SECONDS: 20
+      PERSIST_ROOT: ${{ vars.REASBOOK_PERSIST_ROOT }}
       PROJECTS_JSON: ${{ needs.discover-projects.outputs.build_projects }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare persistent build directories
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          echo "PERSIST_ROOT=$persist_root" >> "$GITHUB_ENV"
+          echo "Using persistent root: $persist_root"
+          mkdir -p "$persist_root/reasbook_lake" \
+                   "$persist_root/reasbookweb_lake" \
+                   "$persist_root/elan"
+          rm -rf ReasBook/.lake ReasBookWeb/.lake
+          ln -sfn "$persist_root/reasbook_lake" ReasBook/.lake
+          ln -sfn "$persist_root/reasbookweb_lake" ReasBookWeb/.lake
+          if [ -d "$persist_root/elan" ] && [ -n "$(ls -A "$persist_root/elan" 2>/dev/null)" ]; then
+            mkdir -p "$HOME/.elan"
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a "$persist_root/elan/" "$HOME/.elan/"
+            else
+              cp -a "$persist_root/elan/." "$HOME/.elan/"
+            fi
+          fi
 
       - name: Restore elan cache
         continue-on-error: true
@@ -227,7 +233,9 @@ jobs:
         timeout-minutes: 20
         run: |
           set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh (fast path)" ./scripts/build_reasbook_cache.sh
+          if ! ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh (fast path)" ./scripts/build_reasbook_cache.sh; then
+            echo "[fast path] cache get failed; continuing with local build"
+          fi
 
       - name: Build ReasBook core target (fast path)
         timeout-minutes: 80
@@ -262,20 +270,59 @@ jobs:
             ~/.elan/toolchains
           key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
 
+      - name: Persist elan toolchain
+        if: always()
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          mkdir -p "$persist_root/elan"
+          if [ -d "$HOME/.elan" ]; then
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a --delete "$HOME/.elan/" "$persist_root/elan/"
+            else
+              rm -rf "$persist_root/elan"/*
+              cp -a "$HOME/.elan/." "$persist_root/elan/"
+            fi
+          fi
+
   build-monolith-site:
     needs:
       - discover-projects
       - check-doc-cache
       - build-full-docs-fallback
     if: always() && needs.discover-projects.outputs.full_deploy == 'true' && (needs.check-doc-cache.outputs.doc_cache_available == 'true' || needs.build-full-docs-fallback.result == 'success')
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64]
     timeout-minutes: 300
     env:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
       RETRY_ON_143_SLEEP_SECONDS: 20
+      PERSIST_ROOT: ${{ vars.REASBOOK_PERSIST_ROOT }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Prepare persistent build directories
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          echo "PERSIST_ROOT=$persist_root" >> "$GITHUB_ENV"
+          echo "Using persistent root: $persist_root"
+          mkdir -p "$persist_root/reasbook_lake" \
+                   "$persist_root/reasbookweb_lake" \
+                   "$persist_root/elan"
+          rm -rf ReasBook/.lake ReasBookWeb/.lake
+          ln -sfn "$persist_root/reasbook_lake" ReasBook/.lake
+          ln -sfn "$persist_root/reasbookweb_lake" ReasBookWeb/.lake
+          if [ -d "$persist_root/elan" ] && [ -n "$(ls -A "$persist_root/elan" 2>/dev/null)" ]; then
+            mkdir -p "$HOME/.elan"
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a "$persist_root/elan/" "$HOME/.elan/"
+            else
+              cp -a "$persist_root/elan/." "$HOME/.elan/"
+            fi
+          fi
 
       - name: Restore elan cache
         continue-on-error: true
@@ -362,7 +409,9 @@ jobs:
         timeout-minutes: 30
         run: |
           set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh" ./scripts/build_reasbook_cache.sh
+          if ! ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_cache.sh" ./scripts/build_reasbook_cache.sh; then
+            echo "[monolith] cache get failed; continuing with local build"
+          fi
 
       - name: Build ReasBook core target
         timeout-minutes: 90
@@ -440,6 +489,22 @@ jobs:
             ~/.elan/bin
             ~/.elan/toolchains
           key: elan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain', 'ReasBookWeb/lean-toolchain') }}
+
+      - name: Persist elan toolchain
+        if: always()
+        run: |
+          set -euo pipefail
+          repo_key="${GITHUB_REPOSITORY//\//_}"
+          persist_root="${PERSIST_ROOT:-$HOME/.cache/reasbook-ci/$repo_key}"
+          mkdir -p "$persist_root/elan"
+          if [ -d "$HOME/.elan" ]; then
+            if command -v rsync >/dev/null 2>&1; then
+              rsync -a --delete "$HOME/.elan/" "$persist_root/elan/"
+            else
+              rm -rf "$persist_root/elan"/*
+              cp -a "$HOME/.elan/." "$persist_root/elan/"
+            fi
+          fi
 
   assemble-pages-artifact:
     needs:
