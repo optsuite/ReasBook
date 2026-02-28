@@ -61,6 +61,7 @@ jobs:
       HEARTBEAT_INTERVAL_SECONDS: 45
       RETRY_ON_143_MAX_RETRIES: 1
       RETRY_ON_143_SLEEP_SECONDS: 20
+      SHARED_DOC_MODULES_EXTRA: ""
     steps:
       - uses: actions/checkout@v4
 
@@ -124,11 +125,48 @@ jobs:
           set -euo pipefail
           rm -rf ReasBook/.lake/build/doc/Books ReasBook/.lake/build/doc/Papers
 
-      - name: Build shared ReasBook docs
-        timeout-minutes: 180
+      - name: Build shared ReasBook docs chunk 1 (core modules)
+        timeout-minutes: 75
+        env:
+          SHARED_DOC_MODULES: SiteSupport.LiterateModule
         run: |
           set -euo pipefail
-          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh (docs_full)" ./scripts/build_reasbook_shared_docs.sh
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh (docs_full:chunk1)" ./scripts/build_reasbook_shared_docs.sh
+
+      - name: Save shared chunk1 doc-data cache checkpoint
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ReasBook/.lake/build/doc-data
+          key: lake-reasbook-docdata-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-shared-chunk1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save shared chunk1 build cache checkpoint
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ReasBook/.lake/build/bin
+            ReasBook/.lake/build/lib/lean
+          key: lake-reasbook-lite-v2-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-shared-chunk1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save shared chunk1 doc cache checkpoint
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ReasBook/.lake/build/doc
+          key: lake-reasbook-doc-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('ReasBook/lean-toolchain') }}-${{ hashFiles('ReasBook/lake-manifest.json') }}-shared-chunk1-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Build shared ReasBook docs chunk 2 (optional aggregate modules)
+        if: env.SHARED_DOC_MODULES_EXTRA != ''
+        timeout-minutes: 180
+        env:
+          SHARED_DOC_MODULES: ${{ env.SHARED_DOC_MODULES_EXTRA }}
+        run: |
+          set -euo pipefail
+          ./scripts/ci_retry_on_143.sh ./scripts/ci_heartbeat.sh "build_reasbook_shared_docs.sh (docs_full:chunk2)" ./scripts/build_reasbook_shared_docs.sh
 
       - name: Upload shared docs baseline artifact
         uses: actions/upload-artifact@v4

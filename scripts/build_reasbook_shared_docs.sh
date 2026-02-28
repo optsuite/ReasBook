@@ -1,11 +1,29 @@
 #!/usr/bin/env bash
 
-# Build shared ReasBook API docs.
+# Build shared ReasBook API docs in module chunks.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LAKE_BIN="${LAKE_BIN:-$HOME/.elan/bin/lake}"
 
-echo "[build_reasbook_shared_docs] $(date -u +'%Y-%m-%dT%H:%M:%SZ') building ReasBook:docs"
 cd "$ROOT_DIR/ReasBook"
-"$LAKE_BIN" -R -Kenv=dev build ReasBook:docs
+
+declare -a modules=()
+
+# Default to light-weight shared modules only.
+raw_modules="${SHARED_DOC_MODULES:-SiteSupport.LiterateModule}"
+while IFS= read -r item; do
+  item="$(printf '%s' "$item" | xargs)"
+  [ -n "$item" ] || continue
+  modules+=("$item")
+done < <(printf '%s\n' "$raw_modules" | tr ',' '\n')
+
+if [ "${#modules[@]}" -eq 0 ]; then
+  echo "[build_reasbook_shared_docs] no shared doc modules configured; skipping"
+  exit 0
+fi
+
+for mod in "${modules[@]}"; do
+  echo "[build_reasbook_shared_docs] $(date -u +'%Y-%m-%dT%H:%M:%SZ') building ${mod}:docs"
+  "$LAKE_BIN" -R -Kenv=dev build "${mod}:docs"
+done
