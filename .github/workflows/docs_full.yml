@@ -126,7 +126,7 @@ jobs:
           rm -rf ReasBook/.lake/build/doc/Books ReasBook/.lake/build/doc/Papers
 
       - name: Build shared ReasBook docs chunk 1 (core modules)
-        timeout-minutes: 75
+        timeout-minutes: 180
         env:
           SHARED_DOC_MODULES: ReasBook
         run: |
