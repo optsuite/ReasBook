@@ -1,6 +1,6 @@
 # ReasBook
 
-[Please check the new version at https://github.com/optpku/ReasBook](https://github.com/optpku/ReasBook)
+[Please check the version at https://github.com/optpku/ReasBook](https://github.com/optpku/ReasBook)
 
 **ReasBook** is a Lean 4 project for formalizing mathematics from textbooks and research papers.
 The goal is to preserve the structure of original references while producing machine-checkable proofs.
